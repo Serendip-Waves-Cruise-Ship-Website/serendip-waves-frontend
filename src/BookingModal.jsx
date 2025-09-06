@@ -1123,7 +1123,7 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
                     })()}
                   </div>
                   <div style={{ fontSize: 12, color: '#6c757d', marginTop: 8, fontStyle: 'italic' }}>
-                    * Children (under 12): 50% discount
+                    * Children (under 18): 50% discount
                   </div>
                 </div>
               )}
