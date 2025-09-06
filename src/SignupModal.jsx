@@ -20,6 +20,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [enteredOtp, setEnteredOtp] = useState("");
   const [sentOtp, setSentOtp] = useState("");
   const [otpModalVisible, setOtpModalVisible] = useState(false);
@@ -199,6 +200,8 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                       name="password" 
                       value={form.password} 
                       onChange={handleChange} 
+                      onFocus={() => setPasswordFocused(true)}
+                      onBlur={() => setPasswordFocused(false)}
                       placeholder="Create a password" 
                       style={inputStyle} 
                     />
@@ -217,9 +220,11 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                       {showPassword ? '👁️' : '👁️‍🗨️'}
                     </span>
                   </div>
-                  <div className="text-white small mt-1" style={{opacity:0.85}}>
-                    Password must be at least 6 characters long, include uppercase and lowercase letters, at least one number, and one special character.
-                  </div>
+                  {passwordFocused && (
+                    <div className="text-white small mt-1" style={{opacity:0.85}}>
+                      Password must be at least 6 characters long, include uppercase and lowercase letters, at least one number, and one special character.
+                    </div>
+                  )}
                   {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
