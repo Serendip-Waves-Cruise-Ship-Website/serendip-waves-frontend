@@ -459,11 +459,10 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
   }
 
   return (
-    <div style={overlayStyle} onClick={() => { resetAll(); onClose(); }}>
+    <div style={overlayStyle}>
       <div
         className="card border-0 shadow-lg position-relative"
         style={cardStyle}
-        onClick={e => e.stopPropagation()}
       >
         <button
           style={closeBtnStyle}
