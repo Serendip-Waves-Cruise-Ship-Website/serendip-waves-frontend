@@ -271,14 +271,6 @@ const OurDining = () => {
           <Container>
             <Row className="justify-content-center text-center">
               <Col lg={8}>
-                <Button 
-                  variant="outline-light" 
-                  className="back-btn mb-4"
-                  onClick={() => navigate(-1)}
-                >
-                  <FaArrowLeft className="me-2" />
-                  Back
-                </Button>
                 <h1 className="hero-title">Exceptional Dining at Sea</h1>
                 <p className="hero-subtitle">
                   Discover our world-class culinary offerings tailored to every dietary preference and lifestyle
