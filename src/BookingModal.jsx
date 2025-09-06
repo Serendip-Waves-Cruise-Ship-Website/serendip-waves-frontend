@@ -65,13 +65,16 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
     
     if (totalPassengers - 1 > currentPassengers) {
       // Add new passengers
-      const newPassengers = Array(totalPassengers - 1 - currentPassengers).fill().map((_, i) => ({
-        fullName: "",
-        gender: "",
-        citizenship: "",
-        age: "",
-        isChild: i >= (form.adults - 1) // Mark as child if beyond adult count
-      }));
+      const newPassengers = Array(totalPassengers - 1 - currentPassengers).fill().map((_, i) => {
+        const passengerIndex = currentPassengers + i;
+        return {
+          fullName: "",
+          gender: "",
+          citizenship: "",
+          age: "",
+          isChild: passengerIndex >= (form.adults - 1) // Mark as child if beyond adult count
+        };
+      });
       setForm(prev => ({
         ...prev,
         additionalPassengers: [...prev.additionalPassengers, ...newPassengers]
@@ -81,6 +84,15 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
       setForm(prev => ({
         ...prev,
         additionalPassengers: prev.additionalPassengers.slice(0, totalPassengers - 1)
+      }));
+    } else {
+      // Update existing passengers' isChild status when adults/children ratio changes
+      setForm(prev => ({
+        ...prev,
+        additionalPassengers: prev.additionalPassengers.map((passenger, index) => ({
+          ...passenger,
+          isChild: index >= (form.adults - 1)
+        }))
       }));
     }
   }, [form.adults, form.children, form.additionalPassengers.length]);
@@ -317,7 +329,7 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
 
   const handleAdultsChange = (e) => {
     const adults = Number(e.target.value);
-    const maxChildren = 4 - adults;
+    const maxChildren = 7 - adults;
     setForm(prev => ({
       ...prev,
       adults,
@@ -329,8 +341,8 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
   const handleChildrenChange = (e) => {
     const children = Number(e.target.value);
     const total = (Number(form.adults) || 0) + children;
-    if (total > 4) {
-      setGuestCountError("Total guests (adults + children) cannot exceed 4.");
+    if (total > 7) {
+      setGuestCountError("Total guests (adults + children) cannot exceed 7.");
       return;
     }
     setForm(prev => ({ ...prev, children }));
@@ -350,6 +362,14 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
         setError("Please fill in all primary passenger details.");
         return;
       }
+      
+      // Validate primary passenger age (must be adult for booking)
+      const primaryAge = parseInt(form.primaryPassenger.age);
+      if (primaryAge < 18) {
+        setError("Primary passenger must be 18 years or older to make a booking.");
+        return;
+      }
+      
       // Validate additional passengers
       for (let i = 0; i < form.additionalPassengers.length; i++) {
         const passenger = form.additionalPassengers[i];
@@ -357,7 +377,24 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
           setError(`Please fill in all details for passenger ${i + 2}.`);
           return;
         }
+        
+        // Validate child age restrictions
+        if (passenger.isChild) {
+          const age = parseInt(passenger.age);
+          if (age >= 18) {
+            setError(`Passenger ${i + 2} is marked as a child but age is ${age}. Children must be under 18 years old.`);
+            return;
+          }
+        } else {
+          // Validate adult age restrictions
+          const age = parseInt(passenger.age);
+          if (age < 18) {
+            setError(`Passenger ${i + 2} is marked as an adult but age is ${age}. Adults must be 18 years or older.`);
+            return;
+          }
+        }
       }
+      
       if (!form.cabinType) {
         setError("Please select a cabin type.");
         return;
@@ -793,7 +830,7 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
                 style={{ width: 90, borderRadius: 6, border: '1px solid #ccc', padding: 6, marginTop: 8, marginRight: 12 }}
                 required
               >
-                {[1,2,3,4].map(n => (
+                {[1,2,3,4,5,6,7].map(n => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
@@ -806,7 +843,7 @@ const BookingModal = ({ isOpen, onClose, defaultCountry }) => {
                 style={{ width: 90, borderRadius: 6, border: '1px solid #ccc', padding: 6, marginTop: 8 }}
                 required
               >
-                {Array.from({length: 4 - form.adults + 1}, (_, i) => i).map(n => (
+                {Array.from({length: 7 - form.adults + 1}, (_, i) => i).map(n => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
