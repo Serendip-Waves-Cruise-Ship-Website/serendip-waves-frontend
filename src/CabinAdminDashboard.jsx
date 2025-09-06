@@ -22,6 +22,7 @@ import { Modal, Button } from 'react-bootstrap';
 
 const cabinTypes = ["Interior", "Ocean View", "Balcony", "Suite"];
 const statusOptions = ["Available", "Booked", "Maintenance"];
+const filterStatusOptions = ["Available", "Booked", "Occupied", "Maintenance"];
 
 function CabinAdminDashboard() {
   const { logout } = useContext(AuthContext);
@@ -121,7 +122,37 @@ function CabinAdminDashboard() {
         .includes(search.toLowerCase());
     const matchesCruise = cruise === "All Cruises" || cabin.cruise === cruise;
     const matchesType = type === "All Types" || cabin.type === type;
-    const matchesStatus = status === "All Status" || cabin.status === status;
+    
+    // Enhanced status matching to handle dynamic status
+    let matchesStatus = status === "All Status";
+    if (!matchesStatus) {
+      if (status === "Maintenance" && cabin.status === "Maintenance") {
+        matchesStatus = true;
+      } else if (status !== "Maintenance") {
+        // For non-maintenance status, check both static and dynamic status
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let currentStatus = cabin.status || "Available";
+        
+        if (cabin.tripStart && cabin.tripEnd && cabin.status !== "Maintenance") {
+          const start = new Date(cabin.tripStart);
+          const end = new Date(cabin.tripEnd);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          
+          if (today < start) {
+            currentStatus = "Booked";
+          } else if (today >= start && today <= end) {
+            currentStatus = "Occupied";
+          } else if (today > end) {
+            currentStatus = "Available";
+          }
+        }
+        
+        matchesStatus = currentStatus === status;
+      }
+    }
+    
     return matchesSearch && matchesCruise && matchesType && matchesStatus;
   });
 
@@ -316,7 +347,7 @@ function CabinAdminDashboard() {
                 onChange={(e) => setStatus(e.target.value)}
               >
                 <option>All Status</option>
-                {statusOptions.map((name) => (
+                {filterStatusOptions.map((name) => (
                   <option key={name}>{name}</option>
                 ))}
               </select>
@@ -407,35 +438,62 @@ function CabinAdminDashboard() {
                       <td>${cabin.price.toLocaleString()}</td>
                       <td>
                         {(() => {
-                          // Use tripStart/tripEnd if present, else fallback
-                          const today = new Date('2025-07-25');
-                          let statusLabel = cabin.status;
-                          let badgeClass = "bg-warning text-dark";
+                          // Get current date (without time for accurate date comparison)
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          let statusLabel = cabin.status || "Available";
+                          let badgeClass = "bg-secondary";
+                          
+                          // If admin has manually set status to Maintenance, always show that
+                          if (cabin.status === "Maintenance") {
+                            return (
+                              <span className="badge rounded-pill bg-warning text-dark">
+                                Maintenance
+                              </span>
+                            );
+                          }
+                          
+                          // Check trip dates for dynamic status
                           if (cabin.tripStart && cabin.tripEnd) {
                             const start = new Date(cabin.tripStart);
                             const end = new Date(cabin.tripEnd);
+                            start.setHours(0, 0, 0, 0);
+                            end.setHours(23, 59, 59, 999);
+                            
                             if (today < start) {
-                              statusLabel = "Upcoming";
-                              badgeClass = "bg-info text-dark";
-                            } else if (today > end) {
-                              statusLabel = "Completed";
-                              badgeClass = "bg-secondary";
+                              statusLabel = "Booked";
+                              badgeClass = "bg-primary";
                             } else if (today >= start && today <= end) {
                               statusLabel = "Occupied";
                               badgeClass = "bg-success";
+                            } else if (today > end) {
+                              statusLabel = "Available";
+                              badgeClass = "bg-info";
                             }
                           } else {
-                            // fallback to legacy status
-                            if (cabin.status === "Booked") badgeClass = "bg-success";
-                            else if (cabin.status === "Available") badgeClass = "bg-primary";
+                            // Fallback to manual status if no trip dates
+                            switch (cabin.status) {
+                              case "Booked":
+                                badgeClass = "bg-primary";
+                                break;
+                              case "Occupied":
+                                badgeClass = "bg-success";
+                                break;
+                              case "Available":
+                                badgeClass = "bg-info";
+                                break;
+                              default:
+                                badgeClass = "bg-secondary";
+                            }
                           }
+                          
                           return (
                             <span className={`badge rounded-pill ${badgeClass}`}>
                               {statusLabel}
                             </span>
                           );
                         })()}
-
                       </td>
                       <td>
                         <div className="horizontal-action-buttons">
