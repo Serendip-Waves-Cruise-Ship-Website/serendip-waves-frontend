@@ -92,14 +92,6 @@ const ThingsToDo = () => {
           <Container>
             <Row className="justify-content-center text-center">
               <Col lg={8}>
-                <Button 
-                  variant="outline-light" 
-                  className="back-btn mb-4"
-                  onClick={() => navigate(-1)}
-                >
-                  <FaArrowLeft className="me-2" />
-                  Back
-                </Button>
                 <h1 className="hero-title">Luxury Onboard Facilities</h1>
                 <p className="hero-subtitle">
                   Explore the world of comfort, adventure, and care at sea
