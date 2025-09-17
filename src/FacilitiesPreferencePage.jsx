@@ -24,6 +24,8 @@ function FacilitiesPreferencePage() {
   const [showBookingConfirmation, setShowBookingConfirmation] = useState(false);
   const [refreshBookedFacilities, setRefreshBookedFacilities] = useState(0);
   const [existingBookingStatus, setExistingBookingStatus] = useState(null); // Track if booking is paid
+  const [paidFacilities, setPaidFacilities] = useState(new Set()); // Track facilities already paid for
+  const [pendingAmount, setPendingAmount] = useState(0); // Track pending amount
 
   // Fetch facilities from backend
   useEffect(() => {
@@ -97,6 +99,71 @@ function FacilitiesPreferencePage() {
     fetchPassengerData();
   }, [bookingId]);
 
+  // Fetch existing facility bookings to identify paid facilities and pending amounts
+  useEffect(() => {
+    const fetchExistingBookings = async () => {
+      try {
+        const response = await fetch(`http://localhost/Project-I/backend/getCustomerFacilityPreferences.php?booking_id=${bookingId}`);
+        const data = await response.json();
+        
+        if (data.success && data.preference) {
+          const preference = data.preference;
+          
+          // Track pending amount
+          setPendingAmount(preference.pending_amount || 0);
+          
+          // Collect paid facilities
+          const paidFacilitySet = new Set();
+          
+          if (preference.facility_details) {
+            preference.facility_details.forEach(facility => {
+              if (facility.payment_status === 'paid') {
+                // Convert facility name back to facility code for comparison
+                const facilityCode = convertFacilityNameToCode(facility.name);
+                if (facilityCode) {
+                  paidFacilitySet.add(facilityCode);
+                }
+              }
+            });
+          }
+          
+          setPaidFacilities(paidFacilitySet);
+          console.log('Paid facilities detected:', Array.from(paidFacilitySet));
+        }
+      } catch (error) {
+        console.error('Error fetching existing bookings:', error);
+        // Non-blocking error - just continue with empty paid facilities
+      }
+    };
+
+    if (bookingId) {
+      fetchExistingBookings();
+    }
+  }, [bookingId, refreshBookedFacilities]);
+
+  // Helper function to convert facility name back to facility code
+  const convertFacilityNameToCode = (facilityName) => {
+    // Map common facility names to their codes
+    const nameToCodeMap = {
+      'Spa and Wellness Center': 'spa_and_wellness_center',
+      'Fitness Center': 'fitness_center',
+      'Kids\' Club & Play Area': 'kids_club_and_play_area',
+      'Casino Entry Pass': 'casino_entry_pass',
+      'Cinema & Open-Air Movies': 'cinema_and_openair_movies',
+      'Babysitting Services': 'babysitting_services',
+      'Private Party/Event Hall': 'private_partyevent_hall',
+      'Multilingual Support & Translation': 'multilingual_support_and_translation',
+      'WiFi Access': 'wifi',
+      'Room Service': 'room_service',
+      'Laundry Service': 'laundry_service',
+      'Specialty Dining': 'specialty_dining',
+      'Private Cabana Rental': 'private_cabana_rental',
+      'Spa Access': 'spa_access'
+    };
+    
+    return nameToCodeMap[facilityName] || null;
+  };
+
   // Validation functions
   const getMaxQuantityForFacility = (facilityId) => {
     if (!passenger || !passenger.trip_duration || passenger.trip_duration <= 0) {
@@ -147,6 +214,19 @@ function FacilitiesPreferencePage() {
     // Check if journey is completed
     if (passenger && passenger.journey_completed) {
       setError('Cannot book facilities for completed journeys.');
+      return;
+    }
+
+    // Check if facility is already paid for
+    if (paidFacilities.has(facilityId)) {
+      const facilityName = facilities[facilityId]?.name || 'this facility';
+      alert(`You have already paid for "${facilityName}". Paid facilities cannot be booked again.`);
+      return;
+    }
+
+    // Check if there are pending amounts
+    if (pendingAmount > 0) {
+      alert(`You have pending facility bookings totaling $${pendingAmount.toFixed(2)}. Please complete payment for existing bookings before adding new facilities.`);
       return;
     }
 
@@ -512,7 +592,7 @@ function FacilitiesPreferencePage() {
             <div className="facilities-selection">
               <div className="facilities-grid-container">
                 {Object.entries(facilities).map(([facilityId, facility]) => (
-                  <div key={facilityId} className="facility-card-compact">
+                  <div key={facilityId} className={`facility-card-compact ${paidFacilities.has(facilityId) ? 'facility-paid' : ''} ${pendingAmount > 0 && !paidFacilities.has(facilityId) ? 'facility-blocked' : ''}`}>
                     <div className="facility-card-header">
                       <Form.Check 
                         type="checkbox"
@@ -520,7 +600,16 @@ function FacilitiesPreferencePage() {
                         checked={selectedFacilities[facilityId] || false}
                         onChange={() => handleFacilityChange(facilityId)}
                         className="facility-checkbox"
-                        disabled={passenger.journey_completed}
+                        disabled={passenger.journey_completed || paidFacilities.has(facilityId) || pendingAmount > 0}
+                        onClick={(e) => {
+                          if (paidFacilities.has(facilityId)) {
+                            e.preventDefault();
+                            alert(`You have already paid for "${facility.name}". Paid facilities cannot be booked again.`);
+                          } else if (pendingAmount > 0) {
+                            e.preventDefault();
+                            alert(`You have pending facility bookings totaling $${pendingAmount.toFixed(2)}. Please complete payment for existing bookings before adding new facilities.`);
+                          }
+                        }}
                       />
                     </div>
                     <div className="facility-card-content">
@@ -528,6 +617,20 @@ function FacilitiesPreferencePage() {
                       <p className="facility-price">
                         {facility.unitText}
                       </p>
+                      
+                      {/* Status indicators */}
+                      {paidFacilities.has(facilityId) && (
+                        <div className="facility-status-badge paid">
+                          <i className="fas fa-check-circle me-1"></i>
+                          Already Paid
+                        </div>
+                      )}
+                      {pendingAmount > 0 && !paidFacilities.has(facilityId) && (
+                        <div className="facility-status-badge blocked">
+                          <i className="fas fa-lock me-1"></i>
+                          Complete pending payment first
+                        </div>
+                      )}
                       
                       {selectedFacilities[facilityId] && facility.price > 0 && (
                         <div className="quantity-section">
