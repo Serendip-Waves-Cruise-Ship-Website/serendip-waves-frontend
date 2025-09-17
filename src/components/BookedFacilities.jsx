@@ -140,6 +140,14 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
   };
 
   const handlePayNowClick = () => {
+    // Check if there are actually pending facilities
+    const pendingFacilities = bookedFacilities.facility_details?.filter(f => f.payment_status === 'pending') || [];
+    
+    if (pendingFacilities.length === 0) {
+      alert('ℹ️ No pending payments found. All your facility bookings are already confirmed and paid.');
+      return;
+    }
+    
     setShowPaymentModal(true);
     setShowCardDetails(true);
   };
@@ -151,6 +159,36 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
 
     setPaymentLoading(true);
     try {
+      // Extract ONLY pending facilities for payment
+      const pendingFacilities = {};
+      const pendingQuantities = {};
+      let pendingTotalCost = 0;
+
+      // Only include facilities that have pending payment status
+      if (bookedFacilities.facility_details) {
+        bookedFacilities.facility_details.forEach(facility => {
+          if (facility.payment_status === 'pending') {
+            pendingFacilities[facility.code] = true;
+            pendingQuantities[facility.code] = facility.quantity;
+            pendingTotalCost += facility.total_price;
+          }
+        });
+      }
+
+      console.log('🎯 Processing payment for pending facilities only:', {
+        pendingFacilities,
+        pendingQuantities,
+        pendingTotalCost,
+        allFacilities: bookedFacilities.selected_facilities
+      });
+
+      // Validate that there are pending facilities to pay for
+      if (Object.keys(pendingFacilities).length === 0) {
+        alert('❌ No pending facilities found for payment. All facilities may already be paid.');
+        setPaymentLoading(false);
+        return;
+      }
+
       const response = await fetch('http://localhost/Project-I/backend/processFacilityBooking.php', {
         method: 'POST',
         headers: {
@@ -159,9 +197,9 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
         body: JSON.stringify({
           booking_id: bookingId,
           action: 'confirm',
-          selected_facilities: bookedFacilities.selected_facilities,
-          quantities: bookedFacilities.quantities,
-          total_cost: bookedFacilities.total_cost,
+          selected_facilities: pendingFacilities,  // ONLY pending facilities
+          quantities: pendingQuantities,           // ONLY pending quantities  
+          total_cost: pendingTotalCost,           // ONLY pending amount
           passenger_email: bookedFacilities.passenger_email,
           passenger_name: bookedFacilities.passenger_name,
           card_details: cardDetails
@@ -171,7 +209,21 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
       const data = await response.json();
 
       if (data.success) {
-        alert('✅ Payment completed successfully! Confirmation email sent.');
+        // Check if all bookings were already paid
+        if (data.already_paid) {
+          alert('ℹ️ All facility bookings are already confirmed and paid. No additional payment required.');
+        } else if (data.updated_records && data.updated_records > 0) {
+          // Actual payment was processed
+          if (data.email_sent) {
+            alert('✅ Payment completed successfully! Confirmation email sent.');
+          } else {
+            alert('✅ Payment completed successfully! Email notification may have failed, but payment was processed.');
+          }
+        } else {
+          // Generic success message
+          alert('✅ Payment processed successfully!');
+        }
+        
         // Reset form and close modal
         setShowPaymentModal(false);
         setShowCardDetails(false);
@@ -192,7 +244,12 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
           onBookingUpdate('payment_completed', data);
         }
       } else {
-        alert('Error processing payment: ' + data.message);
+        // Handle different types of errors
+        if (data.message && data.message.includes('No pending facility bookings')) {
+          alert('ℹ️ No pending payments found. All your facility bookings are already confirmed and paid.');
+        } else {
+          alert('Error processing payment: ' + data.message);
+        }
       }
     } catch (error) {
       console.error('Payment processing error:', error);
@@ -412,10 +469,15 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
         {/* Action Buttons for Pending Bookings */}
         {(bookedFacilities.payment_status === 'pending' || bookedFacilities.payment_status === 'partial') && 
          !bookedFacilities.journey_completed && 
-         bookedFacilities.pending_amount > 0 && (
+         bookedFacilities.pending_amount > 0 && 
+         bookedFacilities.facility_details && 
+         bookedFacilities.facility_details.some(facility => facility.payment_status === 'pending') && (
           <div className="mt-3">
             <Alert variant="warning">
-              <strong>Payment Required:</strong> {bookedFacilities.payment_status === 'partial' ? 'Complete your remaining payment to confirm these facilities.' : 'Complete your payment to confirm these facilities.'}
+              <strong>Payment Required:</strong> {bookedFacilities.payment_status === 'partial' ? 
+                `You have $${parseFloat(bookedFacilities.pending_amount).toFixed(2)} in pending facility charges. Complete payment to confirm these facilities.` : 
+                'Complete your payment to confirm these facilities.'
+              }
             </Alert>
             <div className="d-flex gap-2 flex-wrap">
               <Button 
@@ -426,7 +488,7 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
               >
                 <FaCheckCircle className="me-1" />
                 {bookedFacilities.pending_amount > 0 ? 
-                  `Pay Pending $${parseFloat(bookedFacilities.pending_amount).toFixed(2)}` : 
+                  `Confirm Payment $${parseFloat(bookedFacilities.pending_amount).toFixed(2)}` : 
                   'Complete Payment'
                 }
               </Button>
@@ -611,12 +673,21 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
 
         <Modal.Body>
           {/* Order Summary - Compact */}
-          <Alert variant="success" className="mb-3">
+          <Alert variant="warning" className="mb-3">
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <strong>Total Amount: ${parseFloat(bookedFacilities?.total_cost || 0).toFixed(2)}</strong>
+                <strong>Pending Payment: ${parseFloat(bookedFacilities?.pending_amount || 0).toFixed(2)}</strong>
                 <br />
-                <small>{bookedFacilities?.facility_details?.length || 0} facility item{(bookedFacilities?.facility_details?.length || 0) > 1 ? 's' : ''} | Booking ID: {bookingId}</small>
+                <small>
+                  {bookedFacilities?.facility_details?.filter(f => f.payment_status === 'pending').length || 0} pending facility item
+                  {(bookedFacilities?.facility_details?.filter(f => f.payment_status === 'pending').length || 0) !== 1 ? 's' : ''} | Booking ID: {bookingId}
+                </small>
+                {bookedFacilities?.paid_amount > 0 && (
+                  <>
+                    <br />
+                    <small className="text-success">Already Paid: ${parseFloat(bookedFacilities.paid_amount).toFixed(2)}</small>
+                  </>
+                )}
               </div>
               <FaCheckCircle size={24} />
             </div>
@@ -805,7 +876,7 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
                 <FaLock className="me-2" />
               )}
               {bookedFacilities?.pending_amount > 0 ? 
-                `Complete Payment $${parseFloat(bookedFacilities.pending_amount).toFixed(2)}` :
+                `Confirm Pending Payment $${parseFloat(bookedFacilities.pending_amount).toFixed(2)}` :
                 `Complete Payment $${parseFloat(bookedFacilities?.total_cost || 0).toFixed(2)}`
               }
             </Button>

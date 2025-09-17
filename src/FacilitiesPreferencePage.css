@@ -354,14 +354,52 @@
 /* Disabled facility styles */
 .facility-card-compact.facility-paid {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-color: #28a745;
-  opacity: 0.7;
-  cursor: not-allowed;
+  border: 2px solid #28a745 !important;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(60%) !important;
+  position: relative;
+}
+
+.facility-card-compact.facility-paid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(40, 167, 69, 0.1) 10px,
+    rgba(40, 167, 69, 0.1) 20px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.facility-card-compact.facility-paid::after {
+  content: '✓ PAID';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  background: rgba(40, 167, 69, 0.9);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  pointer-events: none;
+  z-index: 10;
 }
 
 .facility-card-compact.facility-paid:hover {
-  transform: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transform: none !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
 }
 
 .facility-card-compact.facility-blocked {
@@ -387,9 +425,24 @@
 }
 
 .facility-status-badge.paid {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: #28a745 !important;
+  color: white !important;
+  border: 2px solid #1e7e34 !important;
+  font-weight: bold !important;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3) !important;
+  animation: pulse-green 2s infinite !important;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
 }
 
 .facility-status-badge.blocked {
@@ -400,15 +453,28 @@
 
 .facility-card-compact.facility-paid .facility-checkbox,
 .facility-card-compact.facility-blocked .facility-checkbox {
-  pointer-events: none;
+  pointer-events: none !important;
+  opacity: 0.3 !important;
 }
 
 .facility-card-compact.facility-paid .facility-name,
 .facility-card-compact.facility-blocked .facility-name {
-  color: #6c757d;
+  color: #6c757d !important;
+  text-decoration: line-through !important;
+  opacity: 0.6 !important;
 }
 
 .facility-card-compact.facility-paid .facility-price,
 .facility-card-compact.facility-blocked .facility-price {
-  color: #868e96;
+  color: #868e96 !important;
+  opacity: 0.6 !important;
+}
+
+/* Make the entire paid facility card non-interactive */
+.facility-card-compact.facility-paid * {
+  pointer-events: none !important;
+}
+
+.facility-card-compact.facility-paid {
+  user-select: none !important;
 }

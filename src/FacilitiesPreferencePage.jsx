@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Form, Row, Col, Table, Card, Alert } from 'react-bootstrap';
 import { FaSwimmingPool, FaCheckCircle, FaCreditCard, FaSave, FaArrowLeft } from 'react-icons/fa';
@@ -99,60 +99,84 @@ function FacilitiesPreferencePage() {
     fetchPassengerData();
   }, [bookingId]);
 
-  // Fetch existing facility bookings to identify paid facilities and pending amounts
-  useEffect(() => {
-    const fetchExistingBookings = async () => {
-      try {
-        const response = await fetch(`http://localhost/Project-I/backend/getCustomerFacilityPreferences.php?booking_id=${bookingId}`);
-        const data = await response.json();
+  // Function to fetch existing facility bookings to identify paid facilities and pending amounts
+  const fetchExistingBookings = useCallback(async () => {
+    try {
+      const response = await fetch(`http://localhost/Project-I/backend/getCustomerFacilityPreferences.php?booking_id=${bookingId}`);
+      const data = await response.json();
+      
+      if (data.success && data.preference) {
+        const preference = data.preference;
         
-        if (data.success && data.preference) {
-          const preference = data.preference;
-          
-          // Track pending amount
-          setPendingAmount(preference.pending_amount || 0);
-          
-          // Collect paid facilities
-          const paidFacilitySet = new Set();
-          
-          if (preference.facility_details) {
-            preference.facility_details.forEach(facility => {
-              if (facility.payment_status === 'paid') {
-                // Convert facility name back to facility code for comparison
-                const facilityCode = convertFacilityNameToCode(facility.name);
-                if (facilityCode) {
-                  paidFacilitySet.add(facilityCode);
-                }
+        // Track pending amount
+        setPendingAmount(preference.pending_amount || 0);
+        
+        // Collect paid facilities
+        const paidFacilitySet = new Set();
+        
+        if (preference.facility_details) {
+          console.log('🔍 Processing facility details:', preference.facility_details);
+          preference.facility_details.forEach(facility => {
+            console.log(`📊 Facility: "${facility.name}" - Payment Status: ${facility.payment_status}`);
+            if (facility.payment_status === 'paid') {
+              // Convert facility name back to facility code for comparison
+              const facilityCode = convertFacilityNameToCode(facility.name);
+              console.log(`🔄 Mapping "${facility.name}" → "${facilityCode}"`);
+              if (facilityCode) {
+                paidFacilitySet.add(facilityCode);
+                console.log(`✅ Added to paid facilities: ${facilityCode}`);
+              } else {
+                console.error(`❌ Failed to map facility name: "${facility.name}"`);
               }
-            });
-          }
-          
-          setPaidFacilities(paidFacilitySet);
-          console.log('Paid facilities detected:', Array.from(paidFacilitySet));
+            }
+          });
         }
-      } catch (error) {
-        console.error('Error fetching existing bookings:', error);
-        // Non-blocking error - just continue with empty paid facilities
+        
+        setPaidFacilities(paidFacilitySet);
+        console.log('🎯 Final paid facilities set:', Array.from(paidFacilitySet));
       }
-    };
+    } catch (error) {
+      console.error('Error fetching existing bookings:', error);
+      // Non-blocking error - just continue with empty paid facilities
+    }
+  }, [bookingId]);
 
+  // Fetch existing facility bookings on component mount and when booking updates
+  useEffect(() => {
     if (bookingId) {
       fetchExistingBookings();
     }
-  }, [bookingId, refreshBookedFacilities]);
+  }, [bookingId, refreshBookedFacilities, fetchExistingBookings]);
 
   // Helper function to convert facility name back to facility code
   const convertFacilityNameToCode = (facilityName) => {
-    // Map common facility names to their codes
+    // Map ALL facility names from database to their codes
     const nameToCodeMap = {
+      // Current active facilities from database (updated with complete mapping)
       'Spa and Wellness Center': 'spa_and_wellness_center',
-      'Fitness Center': 'fitness_center',
-      'Kids\' Club & Play Area': 'kids_club_and_play_area',
+      'Water Sports Adventure': 'water_sports_adventure',
       'Casino Entry Pass': 'casino_entry_pass',
-      'Cinema & Open-Air Movies': 'cinema_and_openair_movies',
       'Babysitting Services': 'babysitting_services',
+      'Private Partyevent Hall': 'private_partyevent_hall',
+      'Translator Support': 'translator_support',
+      'Fitness Center': 'fitness_center',
+      'Cinema & Open-Air Movies': 'cinema_and_openair_movies',
+      'Kids\' Club & Play Area': 'kids_club_and_play_area',
+      'swimming': 'swimming',
+      'dance': 'dance',
+      'Swimming Pool': 'swimming_pool',
+      'Casino Gaming': 'casino_gaming',
+      'Gymnasium': 'gymnasium',
+      'Fine Dining Restaurant': 'fine_dining_restaurant',
+      'Cocktail Bar': 'cocktail_bar',
+      'Library': 'library',
+      'Theater': 'theater',
+      'Mini Golf': 'mini_golf',
+      'duty free shopping': 'duty_free_shopping',
+      
+      // Legacy mappings for backward compatibility
       'Private Party/Event Hall': 'private_partyevent_hall',
-      'Multilingual Support & Translation': 'multilingual_support_and_translation',
+      'Multilingual Support & Translation': 'translator_support',
       'WiFi Access': 'wifi',
       'Room Service': 'room_service',
       'Laundry Service': 'laundry_service',
@@ -161,7 +185,11 @@ function FacilitiesPreferencePage() {
       'Spa Access': 'spa_access'
     };
     
-    return nameToCodeMap[facilityName] || null;
+    const code = nameToCodeMap[facilityName];
+    if (!code) {
+      console.warn(`⚠️  No facility code mapping found for: "${facilityName}"`);
+    }
+    return code || null;
   };
 
   // Validation functions
@@ -546,6 +574,8 @@ function FacilitiesPreferencePage() {
                   setSelectedFacilities({});
                   setQuantities({});
                   setExistingBookingStatus(null);
+                  // Refresh paid facilities list
+                  fetchExistingBookings();
                 } else if (action === 'payment_completed') {
                   setSuccess('✅ Payment completed successfully! Your facilities are now confirmed. You can add more facilities below if needed.');
                   // Update status to paid but don't redirect - let user add more facilities
@@ -555,6 +585,8 @@ function FacilitiesPreferencePage() {
                   setQuantities({});
                   // Refresh the booked facilities display
                   setRefreshBookedFacilities(prev => prev + 1);
+                  // IMPORTANT: Refresh paid facilities list to block newly paid facilities
+                  fetchExistingBookings();
                 } else if (action === 'status_loaded' && data) {
                   // Track the payment status to determine if booking is read-only
                   setExistingBookingStatus(data.payment_status);
@@ -592,7 +624,17 @@ function FacilitiesPreferencePage() {
             <div className="facilities-selection">
               <div className="facilities-grid-container">
                 {Object.entries(facilities).map(([facilityId, facility]) => (
-                  <div key={facilityId} className={`facility-card-compact ${paidFacilities.has(facilityId) ? 'facility-paid' : ''} ${pendingAmount > 0 && !paidFacilities.has(facilityId) ? 'facility-blocked' : ''}`}>
+                  <div 
+                    key={facilityId} 
+                    className={`facility-card-compact ${paidFacilities.has(facilityId) ? 'facility-paid' : ''} ${pendingAmount > 0 && !paidFacilities.has(facilityId) ? 'facility-blocked' : ''}`}
+                    onClick={(e) => {
+                      if (paidFacilities.has(facilityId)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        alert(`🚫 "${facility.name}" is already paid for and cannot be modified. This facility has been confirmed for your booking.`);
+                      }
+                    }}
+                  >
                     <div className="facility-card-header">
                       <Form.Check 
                         type="checkbox"
