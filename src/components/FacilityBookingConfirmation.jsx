@@ -141,17 +141,35 @@ const FacilityBookingConfirmation = ({
       const data = await response.json();
 
       if (data.success) {
-        // Show success message based on action
+        // Show success message based on action and email status
         let successMessage = '';
         switch (action) {
           case 'confirm':
-            successMessage = '✅ Payment confirmed! Email confirmation sent.';
+            if (data.email_sent === true) {
+              successMessage = '✅ Payment confirmed! Email confirmation sent.';
+            } else if (data.email_sent === false) {
+              successMessage = '✅ Payment confirmed! (Email delivery failed - please save this confirmation)';
+            } else {
+              successMessage = '✅ Payment confirmed successfully!';
+            }
             break;
           case 'save_pending':
-            successMessage = '💾 Booking saved as pending! Email notification sent.';
+            if (data.email_sent === true) {
+              successMessage = '💾 Booking saved as pending! Email notification sent.';
+            } else if (data.email_sent === false) {
+              successMessage = '💾 Booking saved as pending! (Email delivery failed)';
+            } else {
+              successMessage = '💾 Booking saved as pending!';
+            }
             break;
           case 'cancel':
-            successMessage = '❌ Booking cancelled! Email notification sent.';
+            if (data.email_sent === true) {
+              successMessage = '❌ Booking cancelled! Email notification sent.';
+            } else if (data.email_sent === false) {
+              successMessage = '❌ Booking cancelled! (Email delivery failed)';
+            } else {
+              successMessage = '❌ Booking cancelled!';
+            }
             break;
         }
 
