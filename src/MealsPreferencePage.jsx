@@ -94,7 +94,9 @@ function MealsPreferencePage() {
     // Fetch meal options from the database
     const fetchMealOptions = async () => {
       try {
-        const response = await fetch('http://localhost/Project-I/backend/mealOptionsAPI.php');
+        // Add cache-busting parameter to ensure fresh data
+        const timestamp = new Date().getTime();
+        const response = await fetch(`http://localhost/Project-I/backend/mealOptionsAPI.php?t=${timestamp}`);
         const data = await response.json();
         
         console.log('Meal options API response:', data); // Debug log
@@ -102,12 +104,16 @@ function MealsPreferencePage() {
         if (data.success && data.data) {
           const activeMealOptions = data.data.filter(option => option.status === 'active');
           console.log('Active meal options:', activeMealOptions); // Debug log
+          console.log('Total options from API:', data.data.length); // Debug log
+          console.log('Active options after filter:', activeMealOptions.length); // Debug log
           setMealOptions(activeMealOptions);
           
           // Set default meal type to first active option
           if (activeMealOptions.length > 0 && !mealType) {
             setMealType(activeMealOptions[0].option_id.toString());
           }
+        } else {
+          console.log('API response not successful or no data:', data);
         }
       } catch (error) {
         console.error('Error fetching meal options:', error);
