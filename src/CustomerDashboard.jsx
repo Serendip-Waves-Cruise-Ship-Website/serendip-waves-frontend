@@ -46,7 +46,7 @@ const CustomerDashboard = () => {
     if (activeSection === "edit-profile" && currentUser) {
       setEditForm({
         full_name: currentUser.full_name || currentUser.name || "",
-        
+        email: currentUser.email || "",
         date_of_birth: currentUser.date_of_birth || currentUser.dob || "",
         gender: currentUser.gender || "",
         phone_number: currentUser.phone_number || currentUser.phone || "",
@@ -67,47 +67,71 @@ const CustomerDashboard = () => {
     setEditLoading(true);
     setEditError("");
     setEditSuccess("");
+    
     try {
+      // Client-side validation
+      if (!editForm?.full_name?.trim()) {
+        setEditError("Full name is required");
+        setEditLoading(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append("id", currentUser.id);
       Object.entries(editForm).forEach(([key, value]) => {
-        formData.append(key, value);
+        formData.append(key, value || '');
       });
-      // Always include current email for backend
-      formData.append("email", currentUser.email);
+
+      console.log('Submitting profile update for user ID:', currentUser.id);
+      console.log('Form data being sent:', editForm);
+      
+      // Debug: Log FormData contents
+      for (let [key, value] of formData.entries()) {
+        console.log(`FormData ${key}:`, value);
+      }
+      
       // Update profile
       const response = await fetch("http://localhost/Project-I/backend/updateProfile.php", {
         method: "POST",
         body: formData,
       });
-      const updateData = await response.json();
+
+      // Always try to read the response body, even for error statuses
+      let updateData;
+      try {
+        updateData = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse response as JSON:', jsonError);
+        throw new Error(`Server returned ${response.status} but response is not valid JSON`);
+      }
+
+      console.log('Profile update response:', updateData);
+      
       if (updateData.success) {
         // Always show success message if update succeeded
         setProfileSuccessMsg("Profile updated successfully!");
-        setActiveSection("my-profile"); // Move this here for immediate redirect
-        // Fetch latest user data, but do not change the message if it fails
-        fetch(`http://localhost/Project-I/backend/getUser.php?id=${currentUser.id}`, {
-          credentials: 'include',
-        })
-          .then(res => res.json())
-          .then(userData => {
-            if (userData.success && userData.user) {
-              localStorage.setItem("currentUser", JSON.stringify(userData.user));
-              setCurrentUser(userData.user);
-            } else {
-              setCurrentUser(updateData.user); // fallback
-            }
-            setTimeout(() => setProfileSuccessMsg(""), 2500);
-          })
-          .catch(() => {
-            setCurrentUser(updateData.user); // fallback
-            setTimeout(() => setProfileSuccessMsg(""), 2500);
-          });
+        setActiveSection("my-profile");
+        
+        // Update current user data
+        if (updateData.data) {
+          localStorage.setItem("currentUser", JSON.stringify(updateData.data));
+          setCurrentUser(updateData.data);
+        }
+        
+        setTimeout(() => setProfileSuccessMsg(""), 3000);
       } else {
+        // Show the specific error message from the server
         setEditError(updateData.message || "Failed to update profile.");
       }
-    } catch {
-      setEditError("An error occurred. Please try again.");
+    } catch (error) {
+      console.error('Profile update error:', error);
+      if (error.message.includes('CORS')) {
+        setEditError("Connection error: Please check if the server is running.");
+      } else if (error.message.includes('HTTP error')) {
+        setEditError("Server error: Please try again later.");
+      } else {
+        setEditError("An error occurred while updating your profile. Please try again.");
+      }
     } finally {
       setEditLoading(false);
     }
@@ -457,6 +481,20 @@ const CustomerDashboard = () => {
                   <div className="form-group mb-3">
                     <label>Full Name</label>
                     <input type="text" name="full_name" className="form-control" value={editForm?.full_name || ""} onChange={handleEditFormChange} required />
+                  </div>
+                  
+                  <div className="form-group mb-3">
+                    <label>Email Address</label>
+                    <input 
+                      type="email" 
+                      name="email" 
+                      className="form-control" 
+                      value={editForm?.email || ""} 
+                      readOnly 
+                      style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                      title="Email address cannot be changed for security reasons"
+                    />
+                    <small className="text-muted">Email address cannot be changed for security reasons</small>
                   </div>
                   
                   <div className="form-group mb-3">
