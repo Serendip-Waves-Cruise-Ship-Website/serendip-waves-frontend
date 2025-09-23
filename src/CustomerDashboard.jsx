@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import "./CustomerDashboard.css";
 
 const CustomerDashboard = () => {
-  const { currentUser, loading, setCurrentUser } = useContext(AuthContext);
+  const { currentUser, loading, updateCurrentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [activeSection, setActiveSection] = useState("my-booking");
@@ -95,6 +95,7 @@ const CustomerDashboard = () => {
       const response = await fetch("http://localhost/Project-I/backend/updateProfile.php", {
         method: "POST",
         body: formData,
+        credentials: 'include', // Important: Include cookies for session
       });
 
       // Always try to read the response body, even for error statuses
@@ -113,10 +114,10 @@ const CustomerDashboard = () => {
         setProfileSuccessMsg("Profile updated successfully!");
         setActiveSection("my-profile");
         
-        // Update current user data
+        // Update current user data using the new method
         if (updateData.data) {
-          localStorage.setItem("currentUser", JSON.stringify(updateData.data));
-          setCurrentUser(updateData.data);
+          console.log('Updating user data after profile update:', updateData.data);
+          updateCurrentUser(updateData.data);
         }
         
         setTimeout(() => setProfileSuccessMsg(""), 3000);
