@@ -11,6 +11,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
     gender: "",
     email: "",
     passport: "",
+    country: "",
     password: "",
     confirmPassword: ""
   });
@@ -63,6 +64,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
     if (!form.dob) newErrors.dob = "Enter your date of birth in mm/dd/yyyy format.";
     if (!form.gender) newErrors.gender = "Select your gender from the dropdown.";
     if (!form.email) newErrors.email = "Please enter a valid email address.";
+    if (!form.country) newErrors.country = "Please select your country.";
     if (!form.password) newErrors.password = "You must create a password.";
     if (!form.confirmPassword) newErrors.confirmPassword = "Please confirm your password.";
     if (form.password && form.confirmPassword && form.password !== form.confirmPassword) newErrors.confirmPassword = "Passwords do not match.";
@@ -89,16 +91,32 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
 
     setIsLoading(true);
     
+    // Parse country and phone code
+    let countryName = '';
+    let phoneCode = '';
+    let fullPhoneNumber = form.phone;
+    
+    if (form.country) {
+      const [country, code] = form.country.split('|');
+      countryName = country;
+      phoneCode = code;
+      // Combine phone code with phone number
+      fullPhoneNumber = `${phoneCode}${form.phone}`;
+    }
+    
     // Prepare form data for registration
     const formData = new FormData();
     formData.append("name", form.fullName);
     formData.append("email", form.email);
     formData.append("password", form.password);
-    formData.append("phone_number", form.phone);
+    formData.append("phone_number", fullPhoneNumber);
     formData.append("date_of_birth", form.dob);
     formData.append("gender", form.gender);
     if (form.passport) {
       formData.append("passport_number", form.passport);
+    }
+    if (countryName) {
+      formData.append("country", countryName);
     }
 
     try {
@@ -118,6 +136,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
           gender: "",
           email: "",
           passport: "",
+          country: "",
           password: "",
           confirmPassword: ""
         });
@@ -164,8 +183,96 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                 </div>
                 <div className="col-md-6 mb-2">
                   <label className="form-label fw-semibold text-white mb-1">Phone Number *</label>
-                  <input type="tel" className="form-control form-control-lg" name="phone" value={form.phone} onChange={handleChange} placeholder="Enter your phone number" style={inputStyle} />
+                  <div className="input-group">
+                    <select 
+                      className="form-select" 
+                      name="country" 
+                      value={form.country} 
+                      onChange={handleChange} 
+                      style={{...inputStyle, maxWidth: '140px', borderRadius: '10px 0 0 10px'}}
+                      required
+                    >
+                      <option value="" disabled>Select Country</option>
+                      <option value="Sri Lanka|+94">Sri Lanka +94</option>
+                      <option value="India|+91">India +91</option>
+                      <option value="United States|+1">United States +1</option>
+                      <option value="United Kingdom|+44">United Kingdom +44</option>
+                      <option value="Canada|+1">Canada +1</option>
+                      <option value="Australia|+61">Australia +61</option>
+                      <option value="Germany|+49">Germany +49</option>
+                      <option value="France|+33">France +33</option>
+                      <option value="Japan|+81">Japan +81</option>
+                      <option value="China|+86">China +86</option>
+                      <option value="Pakistan|+92">Pakistan +92</option>
+                      <option value="Bangladesh|+880">Bangladesh +880</option>
+                      <option value="Afghanistan|+93">Afghanistan +93</option>
+                      <option value="Malaysia|+60">Malaysia +60</option>
+                      <option value="Singapore|+65">Singapore +65</option>
+                      <option value="Thailand|+66">Thailand +66</option>
+                      <option value="Philippines|+63">Philippines +63</option>
+                      <option value="Indonesia|+62">Indonesia +62</option>
+                      <option value="South Korea|+82">South Korea +82</option>
+                      <option value="Italy|+39">Italy +39</option>
+                      <option value="Spain|+34">Spain +34</option>
+                      <option value="Netherlands|+31">Netherlands +31</option>
+                      <option value="Belgium|+32">Belgium +32</option>
+                      <option value="Switzerland|+41">Switzerland +41</option>
+                      <option value="Austria|+43">Austria +43</option>
+                      <option value="Sweden|+46">Sweden +46</option>
+                      <option value="Norway|+47">Norway +47</option>
+                      <option value="Denmark|+45">Denmark +45</option>
+                      <option value="Finland|+358">Finland +358</option>
+                      <option value="Brazil|+55">Brazil +55</option>
+                      <option value="Mexico|+52">Mexico +52</option>
+                      <option value="Argentina|+54">Argentina +54</option>
+                      <option value="Chile|+56">Chile +56</option>
+                      <option value="South Africa|+27">South Africa +27</option>
+                      <option value="Egypt|+20">Egypt +20</option>
+                      <option value="Nigeria|+234">Nigeria +234</option>
+                      <option value="Kenya|+254">Kenya +254</option>
+                      <option value="Morocco|+212">Morocco +212</option>
+                      <option value="New Zealand|+64">New Zealand +64</option>
+                      <option value="Russia|+7">Russia +7</option>
+                      <option value="Turkey|+90">Turkey +90</option>
+                      <option value="Israel|+972">Israel +972</option>
+                      <option value="UAE|+971">UAE +971</option>
+                      <option value="Saudi Arabia|+966">Saudi Arabia +966</option>
+                      <option value="Qatar|+974">Qatar +974</option>
+                      <option value="Kuwait|+965">Kuwait +965</option>
+                      <option value="Bahrain|+973">Bahrain +973</option>
+                      <option value="Oman|+968">Oman +968</option>
+                      <option value="Jordan|+962">Jordan +962</option>
+                      <option value="Lebanon|+961">Lebanon +961</option>
+                      <option value="Iran|+98">Iran +98</option>
+                      <option value="Iraq|+964">Iraq +964</option>
+                      <option value="Nepal|+977">Nepal +977</option>
+                      <option value="Bhutan|+975">Bhutan +975</option>
+                      <option value="Myanmar|+95">Myanmar +95</option>
+                      <option value="Cambodia|+855">Cambodia +855</option>
+                      <option value="Laos|+856">Laos +856</option>
+                      <option value="Vietnam|+84">Vietnam +84</option>
+                      <option value="Mongolia|+976">Mongolia +976</option>
+                      <option value="Kazakhstan|+7">Kazakhstan +7</option>
+                      <option value="Uzbekistan|+998">Uzbekistan +998</option>
+                      <option value="Kyrgyzstan|+996">Kyrgyzstan +996</option>
+                      <option value="Tajikistan|+992">Tajikistan +992</option>
+                      <option value="Turkmenistan|+993">Turkmenistan +993</option>
+                      <option value="Georgia|+995">Georgia +995</option>
+                      <option value="Armenia|+374">Armenia +374</option>
+                      <option value="Azerbaijan|+994">Azerbaijan +994</option>
+                    </select>
+                    <input 
+                      type="tel" 
+                      className="form-control form-control-lg" 
+                      name="phone" 
+                      value={form.phone} 
+                      onChange={handleChange} 
+                      placeholder="Enter phone number" 
+                      style={{...inputStyle, borderRadius: '0 10px 10px 0', borderLeft: 'none'}} 
+                    />
+                  </div>
                   {errors.phone && <div className="text-danger small mt-1">{errors.phone}</div>}
+                  {errors.country && <div className="text-danger small mt-1">{errors.country}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
                   <label className="form-label fw-semibold text-white mb-1">Date of Birth *</label>
