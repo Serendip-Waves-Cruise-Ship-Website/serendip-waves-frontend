@@ -144,6 +144,15 @@
   color: #fff;
 }
 
+.enquiries-reply-btn {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+.enquiries-reply-btn:hover {
+  background: #2e7d32;
+  color: #fff;
+}
+
 @media (max-width: 900px) {
   .enquiries-table-section {
     padding: 20px;
