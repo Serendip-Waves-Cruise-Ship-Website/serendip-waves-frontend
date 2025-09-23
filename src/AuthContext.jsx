@@ -17,10 +17,17 @@ const AuthProvider = ({ children }) => {
       try {
         const userData = JSON.parse(localUser);
         console.log('Found user data in localStorage:', userData);
-        setCurrentUser(userData);
-        setIsAuthenticated(true);
-        setLoading(false);
-        return; // Skip session check if we have valid localStorage data
+        
+        // Validate that we have essential user data
+        if (userData && userData.id && userData.email) {
+          setCurrentUser(userData);
+          setIsAuthenticated(true);
+          setLoading(false);
+          return; // Skip session check if we have valid localStorage data
+        } else {
+          console.log('Invalid user data in localStorage, removing...');
+          localStorage.removeItem('currentUser');
+        }
       } catch (error) {
         console.log('Invalid localStorage data, checking session...');
         localStorage.removeItem('currentUser');
@@ -63,6 +70,7 @@ const AuthProvider = ({ children }) => {
   const updateCurrentUser = (updatedUserData) => {
     console.log('Updating current user data:', updatedUserData);
     setCurrentUser(updatedUserData);
+    setIsAuthenticated(true); // Ensure authentication state is maintained
     // Update localStorage to persist the changes
     localStorage.setItem('currentUser', JSON.stringify(updatedUserData));
   };
