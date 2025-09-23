@@ -51,6 +51,7 @@ const CustomerDashboard = () => {
         gender: currentUser.gender || "",
         phone_number: currentUser.phone_number || currentUser.phone || "",
         passport_number: currentUser.passport_number || currentUser.passport || "",
+        country: currentUser.country || "",
       });
       setEditError("");
       setEditSuccess("");
@@ -446,6 +447,18 @@ const CustomerDashboard = () => {
                     </div>
                   ) : null}
                   
+                  {currentUser?.country ? (
+                    <div className="profile-info-item">
+                      <div className="info-label">
+                        <i className="fas fa-globe"></i>
+                        Country
+                      </div>
+                      <div className="info-value">
+                        {currentUser?.country}
+                      </div>
+                    </div>
+                  ) : null}
+                  
                   {currentUser?.passport_number || currentUser?.passport ? (
                     <div className="profile-info-item">
                       <div className="info-label">
@@ -511,8 +524,28 @@ const CustomerDashboard = () => {
                     </select>
                   </div>
                   <div className="form-group mb-3">
-                    <label>Phone Number</label>
-                    <input type="text" name="phone_number" className="form-control" value={editForm?.phone_number || ""} onChange={handleEditFormChange} />
+                    <label>Phone Number <small className="text-muted">(Cannot be changed)</small></label>
+                    <input 
+                      type="text" 
+                      name="phone_number" 
+                      className="form-control" 
+                      value={editForm?.phone_number || ""} 
+                      readOnly 
+                      style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                      title="Phone number cannot be edited for security reasons"
+                    />
+                  </div>
+                  <div className="form-group mb-3">
+                    <label>Country <small className="text-muted">(Cannot be changed)</small></label>
+                    <input 
+                      type="text" 
+                      name="country" 
+                      className="form-control" 
+                      value={editForm?.country || ""} 
+                      readOnly 
+                      style={{ backgroundColor: '#f8f9fa', cursor: 'not-allowed' }}
+                      title="Country cannot be edited for security reasons"
+                    />
                   </div>
                   <div className="form-group mb-3">
                     <label>Passport Number</label>
