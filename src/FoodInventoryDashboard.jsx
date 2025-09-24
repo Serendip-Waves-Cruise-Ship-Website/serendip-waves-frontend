@@ -188,29 +188,51 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
       setFormError('Please fill in all required fields.');
       return;
     }
-    const payload = {
-      food_item_name: form.itemName,
-      category: form.category,
-      quantity_in_stock: Number(form.quantity),
-      unit: form.unit, // Add the unit field
-      unit_price: Number(form.unitPrice),
-      expiry_date: form.expiryDate,
-      purchase_date: form.purchaseDate,
-      supplier_name: form.supplier,
-      supplier_contact: form.supplierContacts,
-      supplier_email: form.supplierEmail,
-      status: getStatus({ ...form, quantity: Number(form.quantity), expiryDate: form.expiryDate })
-    };
-    if (modalMode === 'add') {
-      await axios.post('http://localhost/Project-I/backend/addFoodItem.php', payload);
-    } else if (modalMode === 'edit') {
-      await axios.post('http://localhost/Project-I/backend/updateStock.php', {
-        ...payload,
-        item_id: form.id
-      });
+    
+    try {
+      const payload = {
+        food_item_name: form.itemName,
+        category: form.category,
+        quantity_in_stock: Number(form.quantity),
+        unit: form.unit, // Add the unit field
+        unit_price: Number(form.unitPrice),
+        expiry_date: form.expiryDate,
+        purchase_date: form.purchaseDate,
+        supplier_name: form.supplier,
+        supplier_contact: form.supplierContacts,
+        supplier_email: form.supplierEmail,
+        status: getStatus({ ...form, quantity: Number(form.quantity), expiryDate: form.expiryDate })
+      };
+      
+      if (modalMode === 'add') {
+        await axios.post('http://localhost/Project-I/backend/addFoodItem.php', payload);
+      } else if (modalMode === 'edit') {
+        await axios.post('http://localhost/Project-I/backend/updateStock.php', {
+          ...payload,
+          item_id: form.id
+        });
+      }
+      
+      refreshData();
+      setShowModal(false);
+      setFormError('');
+    } catch (error) {
+      console.error('Error saving item:', error);
+      console.error('Error response:', error.response);
+      console.error('Error response data:', error.response?.data);
+      
+      let errorMessage = 'Error saving item. Please try again.';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status) {
+        errorMessage = `Server error (${error.response.status}): ${error.response.statusText}`;
+      } else if (error.message) {
+        errorMessage = `Network error: ${error.message}`;
+      }
+      
+      setFormError(errorMessage);
     }
-    refreshData();
-    setShowModal(false);
   };
 
   const handleDelete = async id => {
