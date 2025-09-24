@@ -279,24 +279,24 @@ const DynamicPricing = () => {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '2px 2px',
+        padding: '8px 16px',
         background: '#fff',
         position: 'absolute',
         top: 0,
         left: 0,
         zIndex: 10,
-        minHeight: '90px',
+        minHeight: '60px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
         borderBottom: '1px solid #eee'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img
             src={logo}
             alt="Logo"
-            style={{ height: '80px', width: 'auto', maxWidth: '100px', cursor: 'pointer', objectFit: 'contain' }}
+            style={{ height: '45px', width: 'auto', maxWidth: '60px', cursor: 'pointer', objectFit: 'contain' }}
             onClick={() => navigate('/')}
           />
-          <div style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#1a237e', letterSpacing: '1px' }}>
+          <div style={{ fontWeight: 'bold', fontSize: '1.3rem', color: '#1a237e', letterSpacing: '0.5px' }}>
             Dynamic Pricing Management
           </div>
         </div>
@@ -310,7 +310,7 @@ const DynamicPricing = () => {
         </div>
       </div>
       {/* End Custom Navbar */}
-      <div style={{ marginTop: '110px', padding: '2rem' }}>
+      <div style={{ marginTop: '80px', padding: '2rem' }}>
         {/* Filter Section */}
         <div style={{
           background: 'rgba(255, 255, 255, 0.95)',

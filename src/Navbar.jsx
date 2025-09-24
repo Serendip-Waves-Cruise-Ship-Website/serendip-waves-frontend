@@ -90,7 +90,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
     <>
       <style>{`
         .navbar {
-          padding: 12px 0 !important;
+          padding: 8px 0 !important;
         }
         .navbar .btn-login {
           transition: all 0.2s;
@@ -205,16 +205,16 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           line-height: 1.1 !important;
         }
         .logo-image {
-          width: clamp(60px, 15vw, 120px) !important;
+          width: clamp(50px, 12vw, 100px) !important;
           height: auto !important;
-          max-height: 80px !important;
+          max-height: 60px !important;
         }
         @media (max-width: 576px) {
           .logo-text {
             font-size: 1.1rem !important;
           }
           .logo-image {
-            width: 50px !important;
+            width: 45px !important;
           }
         }
       `}</style>
@@ -229,15 +229,15 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           left: 0,
           right: 0,
           width: '100%',
-          padding: '12px 0',
-          minHeight: '70px',
-          maxHeight: '90px',
+          padding: '8px 0',
+          minHeight: '50px',
+          maxHeight: '65px',
           borderBottom: '1px solid #eee'
         }}
       >
         <div className="container-fluid px-4 d-flex justify-content-between align-items-center">
           {/* Logo and Brand */}
-          <div className="d-flex align-items-center" style={{ padding: '0 8px' }}>
+          <div className="d-flex align-items-center" style={{ padding: '0 4px' }}>
             <Link
               to="/"
               className="navbar-brand d-flex align-items-center fw-bold fs-5 me-4"
@@ -301,7 +301,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
                   fontSize: '1.05rem',
                   padding: '8px 20px',
                   fontWeight: 500
-                }}>Our Dining</Link>
+                }}>Dining</Link>
                 <Link to="/cruise-ships" className="nav-link fw-semibold" style={{ 
                   color: '#222',
                   textDecoration: 'none',
@@ -314,7 +314,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
                   fontSize: '1.05rem',
                   padding: '8px 20px',
                   fontWeight: 500
-                }}>About Us</a>
+                }}>About</a>
                 <a href="#contact" className="nav-link fw-semibold" onClick={e => handleNavClick(e, 'contact')} style={{ 
                   color: '#222',
                   fontSize: '1.05rem',
@@ -418,9 +418,9 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           <a href="#home" className="nav-link" onClick={e => { handleNavClick(e, 'home'); toggleMenu(); }}>Home</a>
           <Link to="/destinations" className="nav-link" onClick={() => setIsMenuOpen(false)}>Destination</Link>
           <Link to="/things-to-do" className="nav-link" onClick={() => setIsMenuOpen(false)}>Facilities</Link>
-          <Link to="/our-dining" className="nav-link" onClick={() => setIsMenuOpen(false)}>Our Dining</Link>
+          <Link to="/our-dining" className="nav-link" onClick={() => setIsMenuOpen(false)}>Dining</Link>
           <Link to="/cruise-ships" className="nav-link" onClick={() => setIsMenuOpen(false)}>Cruises</Link>
-          <a href="#about" className="nav-link" onClick={e => { handleNavClick(e, 'about'); toggleMenu(); }}>About Us</a>
+          <a href="#about" className="nav-link" onClick={e => { handleNavClick(e, 'about'); toggleMenu(); }}>About</a>
           <a href="#contact" className="nav-link" onClick={e => { handleNavClick(e, 'contact'); toggleMenu(); }}>Contact</a>
           {isAuthenticated && (!currentUser?.role || currentUser?.role.toLowerCase() === 'customer') ? (
             <>
@@ -485,7 +485,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
             <Button variant="danger" onClick={() => {
               logout();
               setShowLogoutModal(false);
-              navigate('/');
+              navigate('/login');
             }}>Yes, Logout</Button>
           </Modal.Footer>
         </Modal>

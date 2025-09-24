@@ -76,12 +76,28 @@ const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    console.log('Logout function called');
+    
     setCurrentUser(null);
     setIsAuthenticated(false);
-    // Optionally, call backend to destroy session
-    fetch('http://localhost/Project-I/backend/logout.php', { method: 'POST', credentials: 'include' });
+    
+    // Clear all storage
     localStorage.clear();
     sessionStorage.clear();
+    
+    // Call backend to destroy session
+    fetch('http://localhost/Project-I/backend/logout.php', { 
+      method: 'POST', 
+      credentials: 'include' 
+    }).catch(err => console.log('Logout backend call failed:', err));
+    
+    // Immediately trigger the custom event
+    window.dispatchEvent(new CustomEvent('userLoggedOut'));
+    
+    // Also trigger it after a small delay as backup
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('userLoggedOut'));
+    }, 100);
   };
 
   return (

@@ -12,13 +12,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2px 2px;
+  padding: 8px 16px;
   background: #fff;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
-  min-height: 75px;
+  min-height: 60px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   border-bottom: 1px solid #eee;
 }
@@ -26,22 +26,22 @@
 .enquiries-header-left {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .enquiries-logo {
-  height: 80px;
+  height: 45px;
   width: auto;
-  max-width: 100px;
+  max-width: 60px;
   cursor: pointer;
   object-fit: contain;
 }
 
 .enquiries-title {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: #1a237e;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .enquiries-logout-btn {
@@ -62,7 +62,7 @@
 }
 
 .enquiries-table-container {
-  margin-top: 110px;
+  margin-top: 80px;
   max-width: 1400px;
   width: 100%;
   padding: 0 16px;

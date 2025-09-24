@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,6 +14,7 @@ import BookingModal from './BookingModal';
 import SignupModal from './SignupModal';
 import Navbar from './Navbar';
 import LoginModal from './LoginModal';
+import HeroBackground from './HeroBackground';
 import CruiseShipsPage from './CruiseShipsPage';
 import BookingOverviewPage from './BookingOverviewPage';
 import SuperAdminDashboard from './SuperAdminDashboard';
@@ -45,16 +46,60 @@ function SignupRouteHandler({ isAuthenticated, setIsSignupModalOpen }) {
   React.useEffect(() => {
     setIsSignupModalOpen(true);
   }, [setIsSignupModalOpen]);
+  
   if (isAuthenticated) return <Navigate to="/" />;
-  return null;
+  
+  return (
+    <HeroBackground fullHeight={true}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100vh',
+        textAlign: 'center',
+        color: 'white'
+      }}>
+        <div>
+          <h1 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            Join Serendip Waves
+          </h1>
+          <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+            Create Your Account for Luxury Cruising
+          </p>
+        </div>
+      </div>
+    </HeroBackground>
+  );
 }
 
 function LoginRouteHandler({ isAuthenticated, setIsLoginModalOpen }) {
   React.useEffect(() => {
     setIsLoginModalOpen(true);
   }, [setIsLoginModalOpen]);
+  
   if (isAuthenticated) return <Navigate to="/" />;
-  return null;
+  
+  return (
+    <HeroBackground fullHeight={true}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100vh',
+        textAlign: 'center',
+        color: 'white'
+      }}>
+        <div>
+          <h1 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            Welcome to Serendip Waves
+          </h1>
+          <p style={{ fontSize: '1.25rem', opacity: 0.9 }}>
+            Where Luxury Meets the Sea
+          </p>
+        </div>
+      </div>
+    </HeroBackground>
+  );
 }
 
 const ProtectedRoute = ({ allowedRoles, children }) => {
@@ -75,7 +120,8 @@ function AppRoutes(props) {
     setIsSignupModalOpen,
     isLoginModalOpen,
     isSignupModalOpen,
-    defaultBookingCountry
+    defaultBookingCountry,
+    loginKey
   } = props;
   const { isBookingModalOpen, setIsBookingModalOpen } = useContext(AuthContext);
 
@@ -120,6 +166,7 @@ function AppRoutes(props) {
         />
       )}
       <LoginModal
+        key={loginKey}
         isOpen={isLoginModalOpen}
         onClose={() => {
           setIsLoginModalOpen(false);
@@ -187,6 +234,16 @@ const App = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [defaultBookingCountry, _setDefaultBookingCountry] = useState("");
+  const [loginKey, setLoginKey] = useState(Date.now());
+
+  // Listen for logout events to force LoginModal remount
+  useEffect(() => {
+    const handleLogout = () => {
+      setLoginKey(Date.now());
+    };
+    window.addEventListener('userLoggedOut', handleLogout);
+    return () => window.removeEventListener('userLoggedOut', handleLogout);
+  }, []);
 
   return (
     <AuthProvider>
@@ -197,6 +254,7 @@ const App = () => {
           isLoginModalOpen={isLoginModalOpen}
           isSignupModalOpen={isSignupModalOpen}
           defaultBookingCountry={defaultBookingCountry}
+          loginKey={loginKey}
         />
       </Router>
     </AuthProvider>
