@@ -8,6 +8,7 @@ import {
   useLocation
 } from 'react-router-dom';
 import { AuthContext, AuthProvider } from './AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 import HomePage from './HomePage';
 import DestinationsPage from './DestinationsPage';
 import BookingModal from './BookingModal';
@@ -247,16 +248,18 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <Router>
-        <AppRoutes
-          setIsLoginModalOpen={setIsLoginModalOpen}
-          setIsSignupModalOpen={setIsSignupModalOpen}
-          isLoginModalOpen={isLoginModalOpen}
-          isSignupModalOpen={isSignupModalOpen}
-          defaultBookingCountry={defaultBookingCountry}
-          loginKey={loginKey}
-        />
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AppRoutes
+            setIsLoginModalOpen={setIsLoginModalOpen}
+            setIsSignupModalOpen={setIsSignupModalOpen}
+            isLoginModalOpen={isLoginModalOpen}
+            isSignupModalOpen={isSignupModalOpen}
+            defaultBookingCountry={defaultBookingCountry}
+            loginKey={loginKey}
+          />
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 };

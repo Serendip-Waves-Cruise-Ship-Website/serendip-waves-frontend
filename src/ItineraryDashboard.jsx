@@ -5,6 +5,7 @@ import './itinerary.css';
 import axios from 'axios';
 import logo from './assets/logo.png';
 import { AuthContext } from './AuthContext';
+import { useToast } from './hooks/useToast';
 
 // Remove static shipNames
 // const shipNames = [ ... ];
@@ -44,6 +45,7 @@ const _commonPorts = [
 
 function ItineraryDashboard() {
   const { logout } = useContext(AuthContext);
+  const { showSuccess, showError, showConfirm } = useToast();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = (to) => { window.location.href = to; };
   const [itineraries, setItineraries] = useState([]);
@@ -182,35 +184,39 @@ function ItineraryDashboard() {
       data = formDataToSend;
       headers = { 'Content-Type': 'multipart/form-data' };
       const res = await axios.post(url, data, { headers });
-      alert(res.data.message);
       if (res.status === 200) {
+        showSuccess(res.data.message || "Itinerary saved successfully!");
         await fetchItineraries();
+        handleCloseModal();
+      } else {
+        showError(res.data.message || "Failed to save itinerary.");
       }
-      handleCloseModal();
     } catch (error) {
-      alert("Failed to save itinerary. Please check your backend.");
+      showError("Failed to save itinerary. Please check your backend.");
       console.error(error);
     }
   };
   
 
   const handleDeleteItinerary = async (id) => {
-    if (window.confirm('Are you sure you want to delete this itinerary?')) {
+    showConfirm('Are you sure you want to delete this itinerary?', async () => {
       try {
         const res = await axios.post(
           "http://localhost/Project-I/backend/deleteItenerary.php",
           { id },
           { headers: { "Content-Type": "application/json" } }
         );
-        alert(res.data.message);
         if (res.status === 200) {
+          showSuccess(res.data.message || "Itinerary deleted successfully!");
           await fetchItineraries();
+        } else {
+          showError(res.data.message || "Failed to delete itinerary.");
         }
       } catch (error) {
-        alert("Failed to delete itinerary. Please check your backend.");
+        showError("Failed to delete itinerary. Please check your backend.");
         console.error(error);
       }
-    }
+    });
   };
 
   const formatDate = (dateString) => {
@@ -525,7 +531,7 @@ function ItineraryDashboard() {
           <Modal.Title>Confirm Logout</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Do you want to logout?
+          Would you like to log out?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseLogoutModal}>

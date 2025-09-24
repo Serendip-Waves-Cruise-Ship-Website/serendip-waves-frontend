@@ -479,7 +479,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           <Modal.Header closeButton>
             <Modal.Title>Confirm Logout</Modal.Title>
           </Modal.Header>
-          <Modal.Body>Do you want to logout?</Modal.Body>
+          <Modal.Body>Would you like to log out?</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowLogoutModal(false)}>No</Button>
             <Button variant="danger" onClick={() => {

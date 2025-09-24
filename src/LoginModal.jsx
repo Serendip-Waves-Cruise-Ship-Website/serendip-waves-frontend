@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from "react-toastify";
 import { Toaster } from 'react-hot-toast';
 import { AuthContext } from "./AuthContext";
+import { useToast } from "./hooks/useToast";
 
 const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -22,6 +23,7 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
   const passwordRef = useRef(null);
   const navigate = useNavigate();
   const { setCurrentUser, setIsAuthenticated } = useContext(AuthContext);
+  const { showSuccess } = useToast();
 
   // Reset fields when modal is opened
   useEffect(() => {
@@ -262,7 +264,7 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
       });
       const data = await response.json();
       if (data.success) {
-        alert('Password reset successful! You can now log in with your new password.');
+        showSuccess('Password reset successful! You can now log in with your new password.');
         setStep("login");
         setForm({ email: forgotEmail, password: "" });
         setNewPassword("");

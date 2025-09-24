@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Alert, Table, Badge, Spinner, Form, Row, Col } from 'react-bootstrap';
 import { FaCreditCard, FaSave, FaTimes, FaCheckCircle, FaLock, FaArrowLeft } from 'react-icons/fa';
+import { useToast } from '../hooks/useToast';
 
 const FacilityBookingConfirmation = ({ 
   show, 
@@ -15,6 +16,7 @@ const FacilityBookingConfirmation = ({
   onBookingComplete 
 }) => {
   console.log('FacilityBookingConfirmation props:', { bookingId, passengerName, passengerEmail });
+  const { showSuccess, showError, showWarning } = useToast();
   const [loading, setLoading] = useState(false);
   const [actionType, setActionType] = useState('');
   const [showCardDetails, setShowCardDetails] = useState(false);
@@ -74,23 +76,23 @@ const FacilityBookingConfirmation = ({
     const { cardType, cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = cardDetails;
     
     if (!cardType) {
-      alert('Please select a card type');
+      showWarning('Please select a card type');
       return false;
     }
     if (!cardNumber || cardNumber.replace(/\s/g, '').length < 13) {
-      alert('Please enter a valid card number');
+      showWarning('Please enter a valid card number');
       return false;
     }
     if (!expiryMonth || !expiryYear) {
-      alert('Please enter card expiry date');
+      showWarning('Please enter card expiry date');
       return false;
     }
     if (!cvv || cvv.length < 3) {
-      alert('Please enter a valid CVV');
+      showWarning('Please enter a valid CVV');
       return false;
     }
     if (!cardholderName.trim()) {
-      alert('Please enter cardholder name');
+      showWarning('Please enter cardholder name');
       return false;
     }
     
@@ -173,7 +175,7 @@ const FacilityBookingConfirmation = ({
             break;
         }
 
-        alert(successMessage);
+        showSuccess(successMessage);
         
         // Call parent callback to refresh data and let it handle modal closure
         if (onBookingComplete) {
@@ -183,11 +185,11 @@ const FacilityBookingConfirmation = ({
         // Close modal immediately after parent callback
         onHide();
       } else {
-        alert('Error: ' + data.message);
+        showError('Error: ' + data.message);
       }
     } catch (error) {
       console.error('Booking error:', error);
-      alert('Failed to process booking. Please try again.');
+      showError('Failed to process booking. Please try again.');
     } finally {
       setLoading(false);
       setActionType('');

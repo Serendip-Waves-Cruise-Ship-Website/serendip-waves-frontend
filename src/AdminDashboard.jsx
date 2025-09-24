@@ -164,7 +164,7 @@ function AdminDashboard() {
           <Modal.Title>Confirm Logout</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Do you want to logout?
+          Would you like to log out?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
