@@ -404,9 +404,9 @@ function FacilitiesPreferencePage() {
               <img 
                 src={logo} 
                 alt="Logo" 
-                width="80" 
-                height="80" 
-                className="me-3" 
+                width="40" 
+                height="40" 
+                className="me-2" 
                 style={{ cursor: 'pointer' }}
                 onClick={(e) => { e.preventDefault(); navigate('/'); }}
               />
@@ -460,9 +460,9 @@ function FacilitiesPreferencePage() {
               <img 
                 src={logo} 
                 alt="Logo" 
-                width="80" 
-                height="80" 
-                className="me-3" 
+                width="40" 
+                height="40" 
+                className="me-2" 
                 style={{ cursor: 'pointer' }}
                 onClick={(e) => { e.preventDefault(); navigate('/'); }}
               />
@@ -517,9 +517,9 @@ function FacilitiesPreferencePage() {
             <img 
               src={logo} 
               alt="Logo" 
-              width="80" 
-              height="80" 
-              className="me-3" 
+              width="40" 
+              height="40" 
+              className="me-2" 
               style={{ cursor: 'pointer' }}
               onClick={(e) => { e.preventDefault(); navigate('/'); }}
             />

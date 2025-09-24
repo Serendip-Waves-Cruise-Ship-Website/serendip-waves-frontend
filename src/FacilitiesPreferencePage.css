@@ -4,6 +4,21 @@
   padding: 20px 0;
 }
 
+/* Navbar height optimization */
+.facilities-preference-page .navbar {
+  min-height: 45px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+.facilities-preference-page .navbar .container-fluid {
+  min-height: 45px !important;
+}
+
+.facilities-preference-page .navbar .d-flex {
+  align-items: center !important;
+}
+
 .facilities-preference-page .card {
   border: none;
   border-radius: 15px;
@@ -272,14 +287,19 @@
 }
 
 .back-history-btn {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  border: none;
-  box-shadow: 0 3px 12px rgba(108, 117, 125, 0.3);
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 3px 12px rgba(40, 167, 69, 0.4) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
 }
 
 .back-history-btn:hover {
+  background: linear-gradient(135deg, #218838 0%, #17a589 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 5px 18px rgba(108, 117, 125, 0.4);
+  box-shadow: 0 5px 18px rgba(40, 167, 69, 0.6) !important;
+  color: #fff !important;
+  border-color: #fff !important;
 }
 
 @media (max-width: 768px) {

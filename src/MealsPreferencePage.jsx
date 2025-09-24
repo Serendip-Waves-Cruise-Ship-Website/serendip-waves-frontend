@@ -367,9 +367,9 @@ function MealsPreferencePage() {
               <img 
                 src={logo} 
                 alt="Logo" 
-                width="80" 
-                height="80" 
-                className="me-3" 
+                width="40" 
+                height="40" 
+                className="me-2" 
                 style={{ cursor: 'pointer' }}
                 onClick={(e) => { e.preventDefault(); navigate('/'); }}
               />
@@ -416,9 +416,9 @@ function MealsPreferencePage() {
             <img 
               src={logo} 
               alt="Logo" 
-              width="80" 
-              height="80" 
-              className="me-3" 
+              width="40" 
+              height="40" 
+              className="me-2" 
               style={{ cursor: 'pointer' }}
               onClick={(e) => { e.preventDefault(); navigate('/'); }}
             />
@@ -538,7 +538,7 @@ function MealsPreferencePage() {
                       disabled={(!isNewOrder && !canOrderAgain && hasExistingPreferences) || isJourneyCompleted}
                     >
                       <option value="">Select number of days...</option>
-                      {Array.from({ length: Math.max(tripDuration || 14, 14) }, (_, i) => i + 1).map(day => (
+                      {Array.from({ length: tripDuration > 0 ? tripDuration : 14 }, (_, i) => i + 1).map(day => (
                         <option key={day} value={day}>
                           {day} day{day > 1 ? 's' : ''} {tripDuration > 0 && day === tripDuration ? '(Full Trip)' : ''}
                         </option>
@@ -546,7 +546,7 @@ function MealsPreferencePage() {
                     </Form.Select>
                     {tripDuration > 0 ? (
                       <small className="text-muted">
-                        Your trip duration is {tripDuration} days. You can order meals for any number of days up to {Math.max(tripDuration, 14)} days.
+                        Your trip duration is {tripDuration} days. You can order meals for any number of days up to the full trip duration ({tripDuration} days).
                       </small>
                     ) : (
                       <small className="text-muted">
