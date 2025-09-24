@@ -54,7 +54,7 @@ function getStatus(item) {
 }
 
 const unitOptions = ['kg', 'l', 'packs'];
-const mealTypes = ['Vegetarian', 'Non-Vegetarian', 'Vegan', 'Gluten-Free', 'Continental', 'Asian', 'Local'];
+const mealTypes = ['Grains', 'Meat', 'Dairy', 'Fruits', 'Vegetables', 'Beverages', 'Others'];
 
 function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
   const { logout } = useContext(AuthContext);
@@ -65,7 +65,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
   const [modalMode, setModalMode] = useState('add');
   const [showDetails, setShowDetails] = useState(false);
   const [detailsItem, setDetailsItem] = useState(null);
-  const [mealTitles, setMealTitles] = useState([]);
+
   const [form, setForm] = useState({
     id: '',
     itemName: '',
@@ -109,18 +109,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
       })
       .catch(() => setData([]));
 
-    // Fetch meal options and types
-    axios.get('http://localhost/Project-I/backend/mealOptionsAPI.php')
-      .then(res => {
-        if (res.data.success && res.data.data) {
-          // Extract unique titles and types
-          const titles = [...new Set(res.data.data.map(option => option.title))];
-          setMealTitles(titles);
-        }
-      })
-      .catch(err => {
-        console.error('Error fetching meal options:', err);
-      });
+
   }, []);
 
   // Unique suppliers for filter dropdown
@@ -439,11 +428,15 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
               <Row className="g-3">
                 <Col md={6}>
                   <Form.Group className="mb-2">
-                    <Form.Label>Title of the Meal *</Form.Label>
-                    <Form.Select name="itemName" value={form.itemName} onChange={handleFormChange} isInvalid={!form.itemName && formError}>
-                      <option value="">Select Meal Title</option>
-                      {mealTitles.map(title => <option key={title} value={title}>{title}</option>)}
-                    </Form.Select>
+                    <Form.Label>Raw Material *</Form.Label>
+                    <Form.Control 
+                      name="itemName" 
+                      type="text" 
+                      value={form.itemName} 
+                      onChange={handleFormChange} 
+                      placeholder="Enter raw material name"
+                      isInvalid={!form.itemName && formError}
+                    />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
