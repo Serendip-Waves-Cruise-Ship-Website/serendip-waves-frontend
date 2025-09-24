@@ -4,6 +4,7 @@ import './foodInventory.css';
 import { Button, Table, Badge, Modal, Form, Row, Col, InputGroup } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaPlus, FaFileCsv, FaFilePdf, FaHistory, FaBoxOpen, FaExclamationTriangle, FaTimesCircle, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import { AuthContext } from './AuthContext';
+import { useToast } from './hooks/useToast';
 import logo from './assets/logo.png';
 
 // Status constants
@@ -58,6 +59,7 @@ const mealTypes = ['Grains', 'Meat', 'Dairy', 'Fruits', 'Vegetables', 'Beverages
 
 function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
   const { logout } = useContext(AuthContext);
+  const { showSuccess, showError, showConfirm } = useToast();
   const navigate = (to) => { window.location.href = to; };
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [data, setData] = useState([]);
@@ -216,6 +218,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
       refreshData();
       setShowModal(false);
       setFormError('');
+      showSuccess(modalMode === 'add' ? 'Food item added successfully!' : 'Food item updated successfully!');
     } catch (error) {
       console.error('Error saving item:', error);
       console.error('Error response:', error.response);
@@ -232,6 +235,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
       }
       
       setFormError(errorMessage);
+      showError(errorMessage);
     }
   };
 
@@ -243,18 +247,19 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
       ? 'Are you sure you want to deactivate this item?' 
       : 'Are you sure you want to reactivate this item?';
     
-    if (window.confirm(confirmMessage)) {
+    showConfirm(confirmMessage, async () => {
       try {
         await axios.post('http://localhost/Project-I/backend/updateStock.php', {
           action: isActive ? 'delete' : 'activate',
           item_id: id
         });
         refreshData();
+        showSuccess(isActive ? 'Item deactivated successfully!' : 'Item reactivated successfully!');
       } catch (error) {
         console.error('Error updating item status:', error);
-        alert('Error updating item status. Please try again.');
+        showError('Error updating item status. Please try again.');
       }
-    }
+    });
   };
 
   // Summary counts
@@ -561,7 +566,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
           <Modal.Title>Confirm Logout</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Do you want to logout?
+          Would you like to log out?
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseLogoutModal}>
@@ -576,4 +581,6 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
   );
 }
 
-export default FoodInventoryDashboard; 
+export default FoodInventoryDashboard;
+
+ 

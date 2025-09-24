@@ -5,11 +5,13 @@ import { FaSwimmingPool, FaCheckCircle, FaCreditCard, FaSave, FaArrowLeft } from
 import logo from './assets/logo.png';
 import BookedFacilities from './components/BookedFacilities';
 import FacilityBookingConfirmation from './components/FacilityBookingConfirmation';
+import { useToast } from './hooks/useToast';
 import './FacilitiesPreferencePage.css';
 
 function FacilitiesPreferencePage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
+  const { showWarning } = useToast();
   
   console.log('FacilitiesPreferencePage rendered, bookingId:', bookingId);
   
@@ -248,13 +250,13 @@ function FacilitiesPreferencePage() {
     // Check if facility is already paid for
     if (paidFacilities.has(facilityId)) {
       const facilityName = facilities[facilityId]?.name || 'this facility';
-      alert(`You have already paid for "${facilityName}". Paid facilities cannot be booked again.`);
+      showWarning(`You have already paid for "${facilityName}". Paid facilities cannot be booked again.`);
       return;
     }
 
     // Check if there are pending amounts
     if (pendingAmount > 0) {
-      alert(`You have pending facility bookings totaling $${pendingAmount.toFixed(2)}. Please complete payment for existing bookings before adding new facilities.`);
+      showWarning(`You have pending facility bookings totaling $${pendingAmount.toFixed(2)}. Please complete payment for existing bookings before adding new facilities.`);
       return;
     }
 
@@ -631,7 +633,7 @@ function FacilitiesPreferencePage() {
                       if (paidFacilities.has(facilityId)) {
                         e.preventDefault();
                         e.stopPropagation();
-                        alert(`🚫 "${facility.name}" is already paid for and cannot be modified. This facility has been confirmed for your booking.`);
+                        showWarning(`🚫 "${facility.name}" is already paid for and cannot be modified. This facility has been confirmed for your booking.`);
                       }
                     }}
                   >
@@ -646,10 +648,10 @@ function FacilitiesPreferencePage() {
                         onClick={(e) => {
                           if (paidFacilities.has(facilityId)) {
                             e.preventDefault();
-                            alert(`You have already paid for "${facility.name}". Paid facilities cannot be booked again.`);
+                            showWarning(`You have already paid for "${facility.name}". Paid facilities cannot be booked again.`);
                           } else if (pendingAmount > 0) {
                             e.preventDefault();
-                            alert(`You have pending facility bookings totaling $${pendingAmount.toFixed(2)}. Please complete payment for existing bookings before adding new facilities.`);
+                            showWarning(`You have pending facility bookings totaling $${pendingAmount.toFixed(2)}. Please complete payment for existing bookings before adding new facilities.`);
                           }
                         }}
                       />

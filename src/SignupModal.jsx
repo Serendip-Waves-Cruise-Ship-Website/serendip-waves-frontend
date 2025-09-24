@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+import { useToast } from './hooks/useToast';
 
 const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
+  const { showSuccess, showError } = useToast();
   const [form, setForm] = useState({
     fullName: "",
     phone: "",
@@ -40,13 +41,13 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
       });
       if (res.data.success) {
         setSentOtp(res.data.otp);
-        toast.success("OTP sent to your email.");
+        showSuccess("OTP sent to your email.");
         setOtpModalVisible(true);
       } else {
-        toast.error(res.data.message || "Failed to send OTP.");
+        showError(res.data.message || "Failed to send OTP.");
       }
     } catch {
-      toast.error("Error sending OTP.");
+      showError("Error sending OTP.");
     }
   };
 
@@ -85,7 +86,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
 
   const handleOtpSubmit = async () => {
     if (enteredOtp.toString().trim() !== sentOtp.toString().trim()) {
-      toast.error("Incorrect OTP.");
+      showError("Incorrect OTP.");
       return;
     }
 
@@ -127,7 +128,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
       });
 
       if (res.data.status === "success") {
-        toast.success("Registration successful!");
+        showSuccess("Registration successful!");
         setSuccess("Account created successfully!");
         setForm({
           fullName: "",
@@ -146,16 +147,16 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
           if (openLoginModal) openLoginModal();
         }, 1500);
       } else {
-        toast.error(res.data.message || "Registration failed.");
+        showError(res.data.message || "Registration failed.");
       }
     } catch (err) {
       console.error("Signup Error:", err);
       if (err.response) {
-        toast.error(`Server Error: ${err.response.data.message || "Check PHP error log"}`);
+        showError(`Server Error: ${err.response.data.message || "Check PHP error log"}`);
       } else if (err.request) {
-        toast.error("No response from server. Check if PHP backend is running.");
+        showError("No response from server. Check if PHP backend is running.");
       } else {
-        toast.error("Request setup error.");
+        showError("Request setup error.");
       }
     }
     setIsLoading(false);
@@ -515,18 +516,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
         </div>
       )}
 
-      <ToastContainer 
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+
     </>
   );
 };

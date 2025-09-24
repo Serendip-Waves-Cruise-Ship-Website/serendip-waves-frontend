@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Badge, Table, Alert, Spinner, Button, Modal, Form, Row, Col } from 'react-bootstrap';
 import { FaSwimmingPool, FaCheckCircle, FaClock, FaTimes, FaEye, FaTrash, FaExclamationTriangle, FaCreditCard, FaLock, FaArrowLeft } from 'react-icons/fa';
 import FacilityBookingReceipt from './FacilityBookingReceipt';
+import { useToast } from '../hooks/useToast';
 
 const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
   const [bookedFacilities, setBookedFacilities] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -78,7 +80,7 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
       const data = await response.json();
 
       if (data.success) {
-        alert('✅ Booking cancelled successfully! Email confirmation sent.');
+        showSuccess('✅ Booking cancelled successfully! Email confirmation sent.');
         // Refresh the data
         fetchBookedFacilities();
         setShowCancelModal(false);
@@ -88,11 +90,11 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
           onBookingUpdate('cancelled', data);
         }
       } else {
-        alert('Error: ' + data.message);
+        showError('Error: ' + data.message);
       }
     } catch (error) {
       console.error('Cancel booking error:', error);
-      alert('Failed to cancel booking. Please try again.');
+      showError('Failed to cancel booking. Please try again.');
     } finally {
       setCancelLoading(false);
     }
@@ -109,23 +111,23 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
     const { cardType, cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = cardDetails;
     
     if (!cardType) {
-      alert('Please select a card type');
+      showWarning('Please select a card type');
       return false;
     }
     if (!cardNumber || cardNumber.replace(/\s/g, '').length < 13) {
-      alert('Please enter a valid card number');
+      showWarning('Please enter a valid card number');
       return false;
     }
     if (!expiryMonth || !expiryYear) {
-      alert('Please enter card expiry date');
+      showWarning('Please enter card expiry date');
       return false;
     }
     if (!cvv || cvv.length < 3) {
-      alert('Please enter a valid CVV');
+      showWarning('Please enter a valid CVV');
       return false;
     }
     if (!cardholderName.trim()) {
-      alert('Please enter cardholder name');
+      showWarning('Please enter cardholder name');
       return false;
     }
     
@@ -144,7 +146,7 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
     const pendingFacilities = bookedFacilities.facility_details?.filter(f => f.payment_status === 'pending') || [];
     
     if (pendingFacilities.length === 0) {
-      alert('ℹ️ No pending payments found. All your facility bookings are already confirmed and paid.');
+      showInfo('ℹ️ No pending payments found. All your facility bookings are already confirmed and paid.');
       return;
     }
     
@@ -184,7 +186,7 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
 
       // Validate that there are pending facilities to pay for
       if (Object.keys(pendingFacilities).length === 0) {
-        alert('❌ No pending facilities found for payment. All facilities may already be paid.');
+        showWarning('❌ No pending facilities found for payment. All facilities may already be paid.');
         setPaymentLoading(false);
         return;
       }
@@ -211,17 +213,17 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
       if (data.success) {
         // Check if all bookings were already paid
         if (data.already_paid) {
-          alert('ℹ️ All facility bookings are already confirmed and paid. No additional payment required.');
+          showInfo('ℹ️ All facility bookings are already confirmed and paid. No additional payment required.');
         } else if (data.updated_records && data.updated_records > 0) {
           // Actual payment was processed
           if (data.email_sent) {
-            alert('✅ Payment completed successfully! Confirmation email sent.');
+            showSuccess('✅ Payment completed successfully! Confirmation email sent.');
           } else {
-            alert('✅ Payment completed successfully! Email notification may have failed, but payment was processed.');
+            showSuccess('✅ Payment completed successfully! Email notification may have failed, but payment was processed.');
           }
         } else {
           // Generic success message
-          alert('✅ Payment processed successfully!');
+          showSuccess('✅ Payment processed successfully!');
         }
         
         // Reset form and close modal
@@ -246,14 +248,14 @@ const BookedFacilities = ({ bookingId, showTitle = true, onBookingUpdate }) => {
       } else {
         // Handle different types of errors
         if (data.message && data.message.includes('No pending facility bookings')) {
-          alert('ℹ️ No pending payments found. All your facility bookings are already confirmed and paid.');
+          showInfo('ℹ️ No pending payments found. All your facility bookings are already confirmed and paid.');
         } else {
-          alert('Error processing payment: ' + data.message);
+          showError('Error processing payment: ' + data.message);
         }
       }
     } catch (error) {
       console.error('Payment processing error:', error);
-      alert('Failed to process payment. Please try again.');
+      showError('Failed to process payment. Please try again.');
     } finally {
       setPaymentLoading(false);
     }
