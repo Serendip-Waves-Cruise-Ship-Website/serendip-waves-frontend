@@ -131,6 +131,12 @@ const DestinationsPage = () => {
                   <div className="destination-overlay">
                     <div className="destination-title">{dest.route}</div>
                     <div className="destination-desc">{dest.description}</div>
+                    {(dest.start_date && dest.end_date) && (
+                      <div className="destination-dates mt-2" style={{fontSize: '1.05rem', fontWeight: 500, color: '#ffd600'}}>
+                        <span>Trip Dates: </span>
+                        <span>{formatDate(dest.start_date)} &ndash; {formatDate(dest.end_date)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
