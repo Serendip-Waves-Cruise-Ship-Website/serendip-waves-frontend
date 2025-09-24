@@ -34,9 +34,9 @@ const ChefDashboard = () => {
       }}
     >
       {/* Header with Logo and Logout */}
-      <div className="d-flex justify-content-between align-items-center p-4" style={{ background: "white", boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
+      <div className="d-flex justify-content-between align-items-center py-2 px-4" style={{ background: "white", boxShadow: "0 2px 10px rgba(0,0,0,0.1)", minHeight: "60px" }}>
         <div className="d-flex align-items-center">
-          <img src={logo} alt="Logo" width="50" height="50" className="me-3" />
+          <img src={logo} alt="Logo" width="40" height="40" className="me-2" />
           <h2 className="text-dark mb-0 fw-bold">Chef Dashboard</h2>
         </div>
         <button 
