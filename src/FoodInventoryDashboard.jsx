@@ -277,24 +277,24 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '2px 2px',
+        padding: '8px 16px',
         background: '#fff',
         position: 'absolute',
         top: 0,
         left: 0,
         zIndex: 10,
-        minHeight: '90px',
+        minHeight: '60px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
         borderBottom: '1px solid #eee'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img
             src={logo}
             alt="Logo"
-            style={{ height: '80px', width: 'auto', maxWidth: '100px', cursor: 'pointer', objectFit: 'contain' }}
+            style={{ height: '45px', width: 'auto', maxWidth: '60px', cursor: 'pointer', objectFit: 'contain' }}
             onClick={() => navigate('/#top')}
           />
-          <div style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#1a237e', letterSpacing: '1px' }}>
+          <div style={{ fontWeight: 'bold', fontSize: '1.3rem', color: '#1a237e', letterSpacing: '0.5px' }}>
             Pantry & Supply Management
           </div>
         </div>
@@ -306,7 +306,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
         </button>
       </div>
       {/* End Custom Navbar */}
-      <div className="container food-inventory-dashboard" style={{ marginTop: '110px' }}>
+      <div className="container food-inventory-dashboard" style={{ marginTop: '80px' }}>
         {/* Summary Bar */}
         <div className="summary-bar d-flex flex-wrap justify-content-center gap-3 mb-4">
           <div className="summary-card">

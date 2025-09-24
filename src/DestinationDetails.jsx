@@ -113,7 +113,7 @@ const DestinationDetails = () => {
               </div>
             )}
             {/* Book Now button - only for logged in users */}
-            {isAuthenticated && currentUser?.role === 'customer' && (
+            {isAuthenticated && currentUser?.role?.toLowerCase() === 'customer' && (
               <button
                 style={{ background: '#ffe066', color: '#222', fontWeight: 700, fontSize: '1.25rem', border: 'none', borderRadius: 30, padding: '12px 38px', marginTop: 10, boxShadow: '0 2px 8px #0001', letterSpacing: 1, cursor: 'pointer', transition: 'background 0.2s' }}
                 onClick={() => {

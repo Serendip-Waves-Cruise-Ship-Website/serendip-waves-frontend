@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from "react-toastify";
@@ -17,6 +17,9 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
   const [passwordError, setPasswordError] = useState("");
   const [step, setStep] = useState("login"); // 'login', 'forgot', 'otp', 'newPassword'
   const [generatedOtp, setGeneratedOtp] = useState("");
+  const [formKey, setFormKey] = useState(Date.now()); // Force re-render on logout
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
   const navigate = useNavigate();
   const { setCurrentUser, setIsAuthenticated } = useContext(AuthContext);
 
@@ -36,6 +39,69 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
       setGeneratedOtp("");
     }
   }, [isOpen]);
+
+  // Clear form when user logs out (from anywhere in the app)
+  useEffect(() => {
+    const handleLogout = () => {
+      console.log('LoginModal: Received logout event, clearing form');
+      
+      // Clear all form state
+      setForm({ email: '', password: '' });
+      setForgotEmail("");
+      setOtp("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setError("");
+      setSuccess("");
+      setIsLoading(false);
+      setPasswordError("");
+      setStep("login");
+      setGeneratedOtp("");
+      setFormKey(Date.now()); // Force complete re-render of form
+      
+      // Forcefully clear the actual DOM input values using multiple methods
+      setTimeout(() => {
+        // Method 1: Using refs
+        if (emailRef.current) {
+          emailRef.current.value = '';
+          emailRef.current.defaultValue = '';
+          emailRef.current.setAttribute('value', '');
+        }
+        if (passwordRef.current) {
+          passwordRef.current.value = '';
+          passwordRef.current.defaultValue = '';
+          passwordRef.current.setAttribute('value', '');
+        }
+        
+        // Method 2: Using getElementById as backup
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-password');
+        if (emailInput) {
+          emailInput.value = '';
+          emailInput.defaultValue = '';
+          emailInput.setAttribute('value', '');
+          emailInput.removeAttribute('value');
+        }
+        if (passwordInput) {
+          passwordInput.value = '';
+          passwordInput.defaultValue = '';
+          passwordInput.setAttribute('value', '');
+          passwordInput.removeAttribute('value');
+        }
+        
+        // Method 3: Trigger input events to notify React
+        [emailInput, passwordInput].forEach(input => {
+          if (input) {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+      }, 50);
+    };
+
+    window.addEventListener('userLoggedOut', handleLogout);
+    return () => window.removeEventListener('userLoggedOut', handleLogout);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -233,11 +299,15 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
               className="form-control form-control-lg"
               id="login-email"
               name="email"
+              ref={emailRef}
+              key={`email-${formKey}`}
               value={form.email}
               onChange={handleChange}
               placeholder="Enter your email"
               style={inputStyle}
-              autoComplete="username"
+              autoComplete="new-email"
+              autoFill="off"
+              data-form-type="other"
               inputMode="email"
               autoCorrect="off"
               spellCheck="false"
@@ -250,11 +320,15 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
               className="form-control form-control-lg"
               id="login-password"
               name="password"
+              ref={passwordRef}
+              key={`password-${formKey}`}
               value={form.password}
               onChange={handleChange}
               placeholder="Enter your password"
               style={inputStyle}
-              autoComplete="current-password"
+              autoComplete="new-password"
+              autoFill="off"
+              data-form-type="other"
               inputMode="text"
               autoCorrect="off"
               spellCheck="false"

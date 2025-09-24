@@ -17,10 +17,17 @@ const AuthProvider = ({ children }) => {
       try {
         const userData = JSON.parse(localUser);
         console.log('Found user data in localStorage:', userData);
-        setCurrentUser(userData);
-        setIsAuthenticated(true);
-        setLoading(false);
-        return; // Skip session check if we have valid localStorage data
+        
+        // Validate that we have essential user data
+        if (userData && userData.id && userData.email) {
+          setCurrentUser(userData);
+          setIsAuthenticated(true);
+          setLoading(false);
+          return; // Skip session check if we have valid localStorage data
+        } else {
+          console.log('Invalid user data in localStorage, removing...');
+          localStorage.removeItem('currentUser');
+        }
       } catch (error) {
         console.log('Invalid localStorage data, checking session...');
         localStorage.removeItem('currentUser');
@@ -63,17 +70,34 @@ const AuthProvider = ({ children }) => {
   const updateCurrentUser = (updatedUserData) => {
     console.log('Updating current user data:', updatedUserData);
     setCurrentUser(updatedUserData);
+    setIsAuthenticated(true); // Ensure authentication state is maintained
     // Update localStorage to persist the changes
     localStorage.setItem('currentUser', JSON.stringify(updatedUserData));
   };
 
   const logout = () => {
+    console.log('Logout function called');
+    
     setCurrentUser(null);
     setIsAuthenticated(false);
-    // Optionally, call backend to destroy session
-    fetch('http://localhost/Project-I/backend/logout.php', { method: 'POST', credentials: 'include' });
+    
+    // Clear all storage
     localStorage.clear();
     sessionStorage.clear();
+    
+    // Call backend to destroy session
+    fetch('http://localhost/Project-I/backend/logout.php', { 
+      method: 'POST', 
+      credentials: 'include' 
+    }).catch(err => console.log('Logout backend call failed:', err));
+    
+    // Immediately trigger the custom event
+    window.dispatchEvent(new CustomEvent('userLoggedOut'));
+    
+    // Also trigger it after a small delay as backup
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('userLoggedOut'));
+    }, 100);
   };
 
   return (
