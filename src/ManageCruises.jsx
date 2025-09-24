@@ -6,9 +6,11 @@ import axios from 'axios';
 import logo from './assets/logo.png';
 import { AuthContext } from './AuthContext';
 import { useContext } from 'react';
+import { useToast } from './hooks/useToast';
 
 function ManageCruises() {
   const { logout } = useContext(AuthContext);
+  const { showSuccess, showError, showConfirm } = useToast();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = (to) => { window.location.href = to; };
   const [ships, setShips] = useState([]);
@@ -164,6 +166,7 @@ function ManageCruises() {
         await axios.post('http://localhost/Project-I/backend/updateShipDetails.php', data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
+        showSuccess('Cruise ship updated successfully!');
       } else {
         // Add with image upload
         const data = new FormData();
@@ -181,23 +184,27 @@ function ManageCruises() {
         await axios.post('http://localhost/Project-I/backend/addShipDetails.php', data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
+        showSuccess('Cruise ship added successfully!');
       }
       handleCloseModal();
       fetchShips();
-    } catch {
-      alert('Failed to save ship.');
+    } catch (error) {
+      console.error('Error saving ship:', error);
+      showError('Failed to save ship. Please try again.');
     }
   };
 
   const handleDeleteShip = async (shipName) => {
-    if (window.confirm('Are you sure you want to delete this ship?')) {
+    showConfirm('Are you sure you want to delete this ship?', async () => {
       try {
         await axios.post('http://localhost/Project-I/backend/deleteShipDetails.php', { ship_name: shipName });
+        showSuccess('Cruise ship deleted successfully!');
         fetchShips();
-      } catch {
-        alert('Failed to delete ship.');
+      } catch (error) {
+        console.error('Error deleting ship:', error);
+        showError('Failed to delete ship. Please try again.');
       }
-    }
+    });
   };
 
   const handleLogoutClick = () => setShowLogoutModal(true);

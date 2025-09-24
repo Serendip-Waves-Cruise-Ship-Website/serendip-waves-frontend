@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import './ItineraryDetails.css';
 import logo from './assets/logo.png';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { AuthContext } from './AuthContext';
+import { useToast } from './hooks/useToast';
 
 const API_BASE = 'http://localhost/Project-I/backend';
 
@@ -21,10 +22,9 @@ const initialForm = {
 
 const ItineraryDetails = () => {
   const { logout } = useContext(AuthContext);
+  const { showSuccess, showError, showConfirm } = useToast();
   const [details, setDetails] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [form, setForm] = useState(initialForm);
   const [editId, setEditId] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
@@ -81,20 +81,20 @@ const ItineraryDetails = () => {
     </div>
   );
 
-  const fetchDetails = async () => {
+  const fetchDetails = useCallback(async () => {
     setLoading(true);
-    setError('');
     try {
       const res = await fetch(`${API_BASE}/getItineraryDetails.php`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setDetails(data);
-    } catch {
-      setError('Error fetching itinerary details');
+    } catch (error) {
+      console.error('Error fetching details:', error);
+      showError('Error fetching itinerary details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
 
   // Fetch available destinations (arrival countries) from itineraries
   const fetchDestinations = async () => {
@@ -114,7 +114,7 @@ const ItineraryDetails = () => {
   useEffect(() => {
     fetchDetails();
     fetchDestinations();
-  }, []);
+  }, [fetchDetails]);
 
   const handleInputChange = e => {
     const { name, value, files } = e.target;
@@ -127,12 +127,10 @@ const ItineraryDetails = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     // Find itinerary_id for selected destination
     const itinerary = itineraries.find(it => it.route === form.destination);
     if (!itinerary) {
-      setError('Selected destination does not match any itinerary.');
+      showError('Selected destination does not match any itinerary.');
       return;
     }
     const endpoint = editId ? 'updateItineraryDetail.php' : 'addItineraryDetail.php';
@@ -150,16 +148,17 @@ const ItineraryDetails = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccess(editId ? 'Detail updated!' : 'Detail added!');
+        showSuccess(editId ? 'Itinerary detail updated successfully!' : 'Itinerary detail added successfully!');
         setForm(initialForm);
         setEditId(null);
         setShowModal(false);
         fetchDetails();
       } else {
-        setError(data.message || 'Error saving detail');
+        showError(data.message || 'Error saving detail');
       }
-    } catch {
-      setError('Error saving detail');
+    } catch (error) {
+      console.error('Error saving detail:', error);
+      showError('Error saving detail');
     } finally {
       setEditLoading(false);
     }
@@ -178,46 +177,40 @@ const ItineraryDetails = () => {
       image5: null,
       destination: detail.destination, // Set destination from detail
     });
-    setSuccess('');
-    setError('');
     setShowModal(true);
   };
 
   const handleDelete = async id => {
-    if (!window.confirm('Delete this itinerary detail?')) return;
-    setError('');
-    setSuccess('');
-    try {
-      const res = await fetch(`${API_BASE}/deleteItineraryDetail.php`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ detail_id: id }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setSuccess('Detail deleted!');
-        fetchDetails();
-      } else {
-        setError(data.message || 'Error deleting detail');
+    showConfirm('Delete this itinerary detail?', async () => {
+      try {
+        const res = await fetch(`${API_BASE}/deleteItineraryDetail.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ detail_id: id }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showSuccess('Itinerary detail deleted successfully!');
+          fetchDetails();
+        } else {
+          showError(data.message || 'Error deleting detail');
+        }
+      } catch (error) {
+        console.error('Error deleting detail:', error);
+        showError('Error deleting detail');
       }
-    } catch {
-      setError('Error deleting detail');
-    }
+    });
   };
 
   const handleCancelEdit = () => {
     setEditId(null);
     setForm(initialForm);
-    setSuccess('');
-    setError('');
     setShowModal(false);
   };
 
   const handleAddDetail = () => {
     setEditId(null);
     setForm(initialForm);
-    setSuccess('');
-    setError('');
     setShowModal(true);
   };
 
@@ -339,8 +332,7 @@ const ItineraryDetails = () => {
                     </div>
                   ))}
                 </div>
-                {success && <div className="itinerary-details-success">{success}</div>}
-                {error && <div className="itinerary-details-error">{error}</div>}
+
               </Form>
             </Modal.Body>
             <Modal.Footer>
