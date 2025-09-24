@@ -369,7 +369,7 @@ function FacilitiesDashboard() {
                                   >
                                     {facility.name}
                                   </Badge>
-                                  <Badge bg="outline-dark" className="quantity-badge">
+                                  <Badge bg="secondary" className="quantity-badge">
                                     {facility.quantity}
                                   </Badge>
                                 </div>

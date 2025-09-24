@@ -317,7 +317,6 @@ const MealsOptionsDashboard = () => {
             onClick={() => navigate('/#top')}
           />
           <div style={{ fontWeight: 'bold', fontSize: '1.3rem', color: '#1a237e', letterSpacing: '0.5px' }}>
-            <FaUtensils className="me-2" />
             Meal Options Management
           </div>
         </div>
@@ -351,15 +350,6 @@ const MealsOptionsDashboard = () => {
               </Col>
               <Col xs="auto">
                 <div className="d-flex gap-2">
-                  <Button
-                    variant="info"
-                    size="lg"
-                    onClick={() => navigate('/meals-dashboard')}
-                    className="d-flex align-items-center"
-                  >
-                    <FaUtensils className="me-2" />
-                    View Meal Preferences
-                  </Button>
                   <Button
                     variant="primary"
                     size="lg"
@@ -430,7 +420,7 @@ const MealsOptionsDashboard = () => {
             </div>
           </Card.Header>
           <Card.Body>
-            <Row className="text-center">
+            <Row className="text-center meal-preferences-summary">
               <Col md={4}>
                 <div className="border-end">
                   <h3 className="text-info mb-1">{mealPreferencesCount}</h3>
@@ -449,7 +439,7 @@ const MealsOptionsDashboard = () => {
               </Col>
               <Col md={4}>
                 <div>
-                  <h3 className="text-warning mb-1" style={{ fontSize: '1.2rem' }}>{popularMealType}</h3>
+                  <h3 className="text-dark mb-1" style={{ fontSize: '1rem', lineHeight: '1.3', fontWeight: '600' }}>{popularMealType}</h3>
                   <small className="text-muted">Most Popular</small>
                   <br />
                   <small className="text-muted">Meal type requested</small>
@@ -476,7 +466,6 @@ const MealsOptionsDashboard = () => {
                     <th>Title</th>
                     <th>Type</th>
                     <th>Description</th>
-                    <th>Key Features</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -484,7 +473,7 @@ const MealsOptionsDashboard = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="8" className="text-center py-4">
+                      <td colSpan="7" className="text-center py-4">
                         <div className="spinner-border text-primary" role="status">
                           <span className="visually-hidden">Loading...</span>
                         </div>
@@ -492,7 +481,7 @@ const MealsOptionsDashboard = () => {
                     </tr>
                   ) : mealOptions.length === 0 ? (
                     <tr>
-                      <td colSpan="8" className="text-center py-4 text-muted">
+                      <td colSpan="7" className="text-center py-4 text-muted">
                         No meal options found. Click "Add New Meal Option" to get started.
                       </td>
                     </tr>
@@ -539,23 +528,6 @@ const MealsOptionsDashboard = () => {
                               ? `${option.description.substring(0, 100)}...`
                               : option.description
                             }
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ maxWidth: '150px' }}>
-                            {Array.isArray(option.key_features) 
-                              ? option.key_features.slice(0, 2).map((feature, idx) => (
-                                  <Badge key={idx} bg="outline-primary" className="me-1 mb-1" style={{ fontSize: '0.7em' }}>
-                                    {feature}
-                                  </Badge>
-                                ))
-                              : option.key_features
-                            }
-                            {Array.isArray(option.key_features) && option.key_features.length > 2 && (
-                              <Badge bg="outline-secondary" style={{ fontSize: '0.7em' }}>
-                                +{option.key_features.length - 2} more
-                              </Badge>
-                            )}
                           </div>
                         </td>
                         <td>{getStatusBadge(option.status)}</td>

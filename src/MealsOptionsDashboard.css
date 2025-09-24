@@ -243,3 +243,24 @@
 .modal-body::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
 }
+
+/* Meal Preferences Summary Styling */
+.meal-preferences-summary .col-md-4 > div {
+  padding: 15px 10px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.meal-preferences-summary h3 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  text-align: center;
+  margin-bottom: 8px !important;
+}
+
+.meal-preferences-summary small {
+  line-height: 1.4;
+}
