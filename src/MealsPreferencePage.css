@@ -4,6 +4,21 @@
   padding: 20px 0;
 }
 
+/* Navbar height optimization */
+.meals-preference-page .navbar {
+  padding: 4px 0;
+  min-height: 45px;
+}
+
+.meals-preference-page .navbar .container-fluid {
+  padding: 0 12px;
+}
+
+.meals-preference-page .navbar .nav-link {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
 .meals-preference-page .card {
   border: none;
   border-radius: 15px;

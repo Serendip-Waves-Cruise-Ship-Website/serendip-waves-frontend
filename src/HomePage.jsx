@@ -151,6 +151,14 @@ const ContactSection = () => {
         /* Hide scrollbar for Chrome, Safari and Opera */
         .contact-section::-webkit-scrollbar { display: none; }
         .contact-section { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Center align button text in contact form */
+        .contact-section .btn {
+          text-align: center !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
     `}</style>
     <div className="container">
       <div className="text-center mb-5">
