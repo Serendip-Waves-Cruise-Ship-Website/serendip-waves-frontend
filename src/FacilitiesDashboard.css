@@ -124,6 +124,9 @@
 .quantity-badge {
   font-size: 0.75em;
   padding: 4px 8px;
+  background-color: #6c757d !important;
+  color: white !important;
+  border: none !important;
 }
 
 .total-cost-cell {
