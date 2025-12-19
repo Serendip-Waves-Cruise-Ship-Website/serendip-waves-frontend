@@ -13,6 +13,8 @@ const Dashboard = () => {
     return <Navigate to="/login" />;
   }
 
+  // Note: Client-side role checking is for UI purposes only.
+  // All sensitive operations must be authorized on the server side.
   const renderDashboard = () => {
     switch (user?.role?.toLowerCase()) {
       case 'customer':
