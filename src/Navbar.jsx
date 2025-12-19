@@ -1,22 +1,19 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import BookingModal from "./BookingModal";
 import { Modal, Button } from 'react-bootstrap';
 
 const Navbar = ({ onLoginClick, onSignupClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 992);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentUser, isAuthenticated, logout, setIsBookingModalOpen, isBookingModalOpen, defaultBookingCountry } = useContext(AuthContext);
-  const [localBookingModalOpen, setLocalBookingModalOpen] = useState(false);
+  const { currentUser, isAuthenticated, logout, defaultBookingCountry } = useContext(AuthContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  // Debug: Log context values on every render
-  console.log("Navbar render: isAuthenticated =", isAuthenticated, "currentUser =", currentUser);
 
   useEffect(() => {
     const handleResize = () => {
@@ -26,6 +23,50 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    let lastScroll = 0;
+    let ticking = false;
+    
+    const handleScroll = () => {
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const shouldBeScrolled = currentScroll > 50;
+      
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // Update scrolled state for navbar styling
+          setIsScrolled(shouldBeScrolled);
+          
+          if (currentScroll <= 10) {
+            // At the top of the page, always show navbar
+            setIsVisible(true);
+          } else if (currentScroll < lastScroll) {
+            // Scrolling up, show navbar
+            setIsVisible(true);
+          } else if (currentScroll > lastScroll && currentScroll > 80) {
+            // Scrolling down and past 80px, hide navbar
+            setIsVisible(false);
+          }
+          
+          lastScroll = currentScroll;
+          ticking = false;
+        });
+        
+        ticking = true;
+      }
+    };
+
+    // Check initial scroll position
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('scroll', handleScroll);
+    };
+  }, [location.pathname]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -93,7 +134,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           padding: 8px 0 !important;
         }
         .navbar .btn-login {
-          transition: all 0.2s;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .navbar .btn-login:hover {
           background: #ffd600 !important;
@@ -101,12 +142,22 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           color: #222 !important;
         }
         .navbar .nav-link, .navbar-nav .nav-link {
-          transition: background 0.2s, color 0.2s;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           border-radius: 10px;
           margin: 0 4px;
         }
         .navbar .nav-link:hover, .navbar-nav .nav-link:hover {
-          background: #e0e7ff !important;
+          background: rgba(224, 231, 255, 0.2) !important;
+        }
+        .btn-profile {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-profile:hover {
+          background: #fff !important;
+          color: #1a237e !important;
+        }
+        .btn-profile.on-homepage:hover {
+          background: #fff !important;
           color: #1a237e !important;
         }
         .hamburger-menu {
@@ -124,11 +175,16 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
         .hamburger-menu span {
           width: 25px;
           height: 3px;
-          background: #1a237e;
           border-radius: 10px;
-          transition: all 0.3s linear;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           transform-origin: 1px;
+        }
+        .hamburger-menu.on-homepage span {
+          background: #fff;
+        }
+        .hamburger-menu:not(.on-homepage) span {
+          background: #1a237e;
         }
         .hamburger-menu.open span:first-child {
           transform: rotate(45deg);
@@ -222,8 +278,8 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
         className="navbar navbar-expand-lg position-fixed w-100 top-0 start-0 px-2"
         style={{ 
           zIndex: 9999, 
-          background: '#fff',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+          background: (location.pathname === '/' && !isScrolled) ? 'transparent' : '#fff',
+          boxShadow: (location.pathname === '/' && !isScrolled) ? 'none' : '0 2px 10px rgba(0,0,0,0.05)',
           position: 'fixed',
           top: 0,
           left: 0,
@@ -232,7 +288,9 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           padding: '8px 0',
           minHeight: '50px',
           maxHeight: '65px',
-          borderBottom: '1px solid #eee'
+          borderBottom: (location.pathname === '/' && !isScrolled) ? 'none' : '1px solid #eee',
+          transform: isVisible ? 'translateY(0)' : 'translateY(-100%)',
+          transition: 'transform 0.3s ease, background 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-bottom 0.4s ease'
         }}
       >
         <div className="container-fluid px-4 d-flex justify-content-between align-items-center">
@@ -262,8 +320,9 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
               <span className="logo-text" style={{ 
                 fontWeight: 700, 
                 letterSpacing: '0.04em', 
-                color: '#1a237e', 
-                whiteSpace: 'nowrap'
+                color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#1a237e', 
+                whiteSpace: 'nowrap',
+                transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
               }}>
                 serendip<br/>waves
               </span>
@@ -275,58 +334,73 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
             <div className="d-flex align-items-center gap-3" style={{ padding: '0 8px' }}>
               <div className="d-flex align-items-center gap-4">
                 <a href="#home" className="nav-link fw-semibold" onClick={e => handleNavClick(e, 'home')} style={{ 
-                  color: '#222', 
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222', 
                   textDecoration: 'none',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>Home</a>
                                <Link to="/destinations" className="nav-link fw-semibold" style={{ 
-                  color: '#222', 
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222', 
                   textDecoration: 'none',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>Destination</Link>
                 <Link to="/things-to-do" className="nav-link fw-semibold" style={{ 
-                  color: '#222', 
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222', 
                   textDecoration: 'none',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>Facilities</Link>
                 <Link to="/our-dining" className="nav-link fw-semibold" style={{ 
-                  color: '#222', 
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222', 
                   textDecoration: 'none',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>Dining</Link>
                 <Link to="/cruise-ships" className="nav-link fw-semibold" style={{ 
-                  color: '#222',
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222',
                   textDecoration: 'none',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>Cruises</Link>
                 <a href="#about" className="nav-link fw-semibold" onClick={e => handleNavClick(e, 'about')} style={{ 
-                  color: '#222',
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>About</a>
                 <a href="#contact" className="nav-link fw-semibold" onClick={e => handleNavClick(e, 'contact')} style={{ 
-                  color: '#222',
+                  color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222',
                   fontSize: '1.05rem',
                   padding: '8px 20px',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>Contact</a>
                 {isAuthenticated && (!currentUser?.role || currentUser?.role.toLowerCase() === 'customer') ? (
                   <div className="position-relative" ref={profileRef}>
                     <button
-                      className="btn btn-outline-light"
+                      className={`btn btn-outline-light btn-profile ${(location.pathname === '/' && !isScrolled) ? 'on-homepage' : ''}`}
                       type="button"
-                      style={{ color: '#222', fontWeight: 700, borderRadius: '22px', padding: '10px 28px', fontSize: '1.05rem' }}
+                      style={{ 
+                        color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222', 
+                        borderColor: (location.pathname === '/' && !isScrolled) ? '#fff' : '#dee2e6',
+                        fontWeight: 700, 
+                        borderRadius: '22px', 
+                        padding: '10px 28px', 
+                        fontSize: '1.05rem',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
                       onClick={() => setProfileOpen((open) => !open)}
                     >
                       {currentUser?.full_name || currentUser?.name || currentUser?.email || 'Profile'}
@@ -357,11 +431,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
                           <button
                             style={{ display: 'block', color: '#1a237e', fontWeight: 500, textDecoration: 'none', marginBottom: 8, background: 'none', border: 'none', width: '100%', textAlign: 'center', padding: 0, cursor: 'pointer' }}
                             onClick={() => {
-                              if (setIsBookingModalOpen) {
-                                setIsBookingModalOpen(true);
-                              } else {
-                                setLocalBookingModalOpen(true);
-                              }
+                              navigate('/booking/summary');
                               setProfileOpen(false);
                             }}
                           >
@@ -383,11 +453,11 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
                       padding: '10px 28px',
                       fontSize: '1.05rem',
                       fontWeight: 500,
-                      border: '1.5px solid #222',
-                      background: '#fff',
-                      color: '#222',
+                      border: (location.pathname === '/' && !isScrolled) ? '1.5px solid #fff' : '1.5px solid #222',
+                      background: (location.pathname === '/' && !isScrolled) ? 'transparent' : '#fff',
+                      color: (location.pathname === '/' && !isScrolled) ? '#fff' : '#222',
                       boxShadow: 'none',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                   >
                     Login
@@ -400,7 +470,7 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
           {/* Mobile Hamburger Menu Button */}
           {!isLargeScreen && (
             <button
-              className={`hamburger-menu ${isMenuOpen ? 'open' : ''}`}
+              className={`hamburger-menu ${isMenuOpen ? 'open' : ''} ${(location.pathname === '/' && !isScrolled) ? 'on-homepage' : ''}`}
               onClick={toggleMenu}
               aria-label="Toggle navigation menu"
             >
@@ -460,19 +530,6 @@ const Navbar = ({ onLoginClick, onSignupClick }) => {
             </button>
           )}
         </div>
-      )}
-      {(isBookingModalOpen !== undefined ? isBookingModalOpen : localBookingModalOpen) && (
-        <BookingModal
-          isOpen={isBookingModalOpen !== undefined ? isBookingModalOpen : localBookingModalOpen}
-          onClose={() => {
-            if (setIsBookingModalOpen) {
-              setIsBookingModalOpen(false);
-            } else {
-              setLocalBookingModalOpen(false);
-            }
-          }}
-          defaultCountry={defaultBookingCountry}
-        />
       )}
       {showLogoutModal && (
         <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)} centered>

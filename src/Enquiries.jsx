@@ -144,12 +144,12 @@ const Enquiries = () => {
             <div className="text-center my-5"><Spinner animation="border" variant="primary" /></div>
           ) : (
             <Table className="enquiries-table" striped bordered hover responsive>
-              <thead>
+              <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
                 <tr>
-                  <th className="enquiries-th">Name</th>
-                  <th className="enquiries-th">Email</th>
-                  <th className="enquiries-th">Message</th>
-                  <th className="enquiries-th">Actions</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Name</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Email</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Message</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>

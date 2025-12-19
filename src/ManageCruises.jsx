@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes, FaShip } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes, FaShip, FaUsers, FaSwimmingPool, FaLayerGroup } from 'react-icons/fa';
 import './ManageCruises.css';
 import axios from 'axios';
 import logo from './assets/logo.png';
@@ -18,11 +18,8 @@ function ManageCruises() {
   const [showModal, setShowModal] = useState(false);
   const [editingShip, setEditingShip] = useState(null);
   const [filters, setFilters] = useState({
-    shipName: '',
     passengerCount: '',
-    poolCount: '',
-    deckCount: '',
-    restaurantCount: ''
+    class: ''
   });
   const [availableShipNames, setAvailableShipNames] = useState([]);
   const [formData, setFormData] = useState({
@@ -62,23 +59,17 @@ function ManageCruises() {
 
   useEffect(() => {
     let filtered = ships;
-    if (filters.shipName) {
-      filtered = filtered.filter(ship => ship.ship_name === filters.shipName);
-    }
     if (filters.passengerCount) {
-      filtered = filtered.filter(ship => Number(ship.passenger_count) === Number(filters.passengerCount));
+      filtered = filtered.filter(ship => Number(ship.passenger_count) >= Number(filters.passengerCount));
     }
-    if (filters.poolCount) {
-      filtered = filtered.filter(ship => Number(ship.pool_count) === Number(filters.poolCount));
-    }
-    if (filters.deckCount) {
-      filtered = filtered.filter(ship => Number(ship.deck_count) === Number(filters.deckCount));
-    }
-    if (filters.restaurantCount) {
-      filtered = filtered.filter(ship => Number(ship.restaurant_count) === Number(filters.restaurantCount));
+    if (filters.class) {
+      filtered = filtered.filter(ship => ship.class === filters.class);
     }
     setFilteredShips(filtered);
   }, [filters, ships]);
+
+  // Calculate summary statistics
+  const totalShips = filteredShips.length;
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -86,11 +77,8 @@ function ManageCruises() {
 
   const clearFilters = () => {
     setFilters({
-      shipName: '',
       passengerCount: '',
-      poolCount: '',
-      deckCount: '',
-      restaurantCount: ''
+      class: ''
     });
   };
 
@@ -272,24 +260,11 @@ function ManageCruises() {
         <div className="itinerary-header"></div>
 
         {/* Filter Section */}
-        <div className="filter-section">
+        <div className="filter-section container">
           <h3 className="filter-title">Filter Ships</h3>
           <div className="filter-row">
             <div className="filter-group">
-              <label className="filter-label">Ship Name</label>
-              <select
-                className="filter-input"
-                value={filters.shipName}
-                onChange={e => handleFilterChange('shipName', e.target.value)}
-              >
-                <option value="">All Ships</option>
-                {availableShipNames.map(ship => (
-                  <option key={ship} value={ship}>{ship}</option>
-                ))}
-              </select>
-            </div>
-            <div className="filter-group">
-              <label className="filter-label">Passenger Count</label>
+              <label className="filter-label">Min. Passenger Capacity</label>
               <input
                 type="number"
                 className="filter-input"
@@ -299,40 +274,21 @@ function ManageCruises() {
               />
             </div>
             <div className="filter-group">
-              <label className="filter-label">Pool Count</label>
-              <input
-                type="number"
+              <label className="filter-label">Ship Class</label>
+              <select
                 className="filter-input"
-                value={filters.poolCount}
-                onChange={e => handleFilterChange('poolCount', e.target.value)}
-                placeholder="e.g. 3"
-              />
-            </div>
-            <div className="filter-group">
-              <label className="filter-label">Deck Count</label>
-              <input
-                type="number"
-                className="filter-input"
-                value={filters.deckCount}
-                onChange={e => handleFilterChange('deckCount', e.target.value)}
-                placeholder="e.g. 10"
-              />
-            </div>
-            <div className="filter-group">
-              <label className="filter-label">Restaurant Count</label>
-              <input
-                type="number"
-                className="filter-input"
-                value={filters.restaurantCount}
-                onChange={e => handleFilterChange('restaurantCount', e.target.value)}
-                placeholder="e.g. 5"
-              />
+                value={filters.class}
+                onChange={e => handleFilterChange('class', e.target.value)}
+              >
+                <option value="">All Classes</option>
+                <option value="Luxury">Luxury</option>
+                <option value="Premium">Premium</option>
+                <option value="Contemporary">Contemporary</option>
+                <option value="Budget">Budget</option>
+              </select>
             </div>
             <div className="filter-group">
               <div className="filter-actions">
-                <Button className="filter-btn" onClick={() => {}}>
-                  <FaSearch /> Filter
-                </Button>
                 <Button className="clear-btn" onClick={clearFilters}>
                   <FaTimes /> Clear
                 </Button>
@@ -341,84 +297,141 @@ function ManageCruises() {
           </div>
         </div>
 
+        {/* Summary Card */}
+        <div className="container mb-4">
+          <div className="row g-3 justify-content-center">
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: '#f8f9fa', borderRadius: '12px' }}>
+                <div className="card-body text-center p-3">
+                  <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '50%', width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                    <FaShip style={{ fontSize: '1.4rem', color: 'white' }} />
+                  </div>
+                  <h4 className="mb-1" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#667eea' }}>{totalShips}</h4>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', color: '#6c757d', fontWeight: '500' }}>Total Ships</p>
+                  <p className="mb-0" style={{ fontSize: '0.75rem', color: '#adb5bd', marginTop: '4px' }}>Active fleet</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Table Section */}
-        <div className="table-section">
-          <div className="table-header">
-            <h3 className="table-title">Cruise Ships</h3>
+        <div className="table-section container">
+          <div className="table-header mb-3 d-flex justify-content-between align-items-center">
+            <h3 className="table-title mb-0">Cruise Ships</h3>
             <Button className="add-btn" onClick={() => handleShowModal()}>
               <FaPlus /> Add Ship
             </Button>
           </div>
-          <Table className="itinerary-table table-striped table-bordered">
-            <thead>
-              <tr>
-                <th>Ship Name</th>
-                <th>Passenger Count</th>
-                <th>Pool Count</th>
-                <th>Deck Count</th>
-                <th>Restaurant Count</th>
-                <th>Ship Image</th>
-                <th>Class</th>
-                <th>Year Built</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan="8" className="text-center">Loading...</td></tr>
-              ) : filteredShips.length > 0 ? (
-                filteredShips.map((ship, idx) => (
-                  <tr key={idx}>
-                    <td><strong>{ship.ship_name}</strong></td>
-                    <td><Badge bg="light" text="dark" style={{ color: '#000', fontWeight: 'bold' }}>{ship.passenger_count}</Badge></td>
-                    <td><Badge bg="light" text="dark" style={{ color: '#000', fontWeight: 'bold' }}>{ship.pool_count}</Badge></td>
-                    <td><Badge bg="light" text="dark" style={{ color: '#000', fontWeight: 'bold' }}>{ship.deck_count}</Badge></td>
-                    <td><Badge bg="light" text="dark" style={{ color: '#000', fontWeight: 'bold' }}>{ship.restaurant_count}</Badge></td>
-                    <td>
-                      {ship.ship_image && (
-                        <img src={`http://localhost/Project-I/backend/${ship.ship_image}`} alt={ship.ship_name} style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 6 }} />
-                      )}
-                    </td>
-                    <td>{ship.class}</td>
-                    <td>{ship.year_built}</td>
-                    <td>
-                      <div className="horizontal-action-buttons">
-                        <button
-                          className="action-rect-btn edit"
-                          title="Edit"
-                          onClick={() => handleShowModal(ship)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="action-rect-btn delete"
-                          title="Delete"
-                          onClick={() => handleDeleteShip(ship.ship_name)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
+          
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
+                  <tr>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Ship Name</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Passengers</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Pools</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Decks</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Restaurants</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Image</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Class</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Year Built</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8" className="text-center py-4">
-                    <div className="empty-state">
-                      <FaShip className="empty-state-icon" />
-                      <div className="empty-state-text">No ships found</div>
-                      <div className="empty-state-subtext">
-                        {Object.values(filters).some(f => f)
-                          ? 'Try adjusting your filters'
-                          : 'Add your first ship to get started'
-                        }
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="9" className="text-center" style={{ padding: '40px' }}>Loading...</td>
+                    </tr>
+                  ) : filteredShips.length > 0 ? (
+                    filteredShips.map((ship, idx) => (
+                      <tr key={idx} style={{ background: idx % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                        <td style={{ padding: '14px 12px' }}>
+                          <strong style={{ color: '#667eea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <FaShip style={{ fontSize: '0.9rem' }} />
+                            {ship.ship_name}
+                          </strong>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <span style={{ background: '#e7f0ff', color: '#667eea', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            <FaUsers style={{ marginRight: '6px', fontSize: '0.8rem' }} />
+                            {ship.passenger_count}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <span style={{ background: '#e3f2fd', color: '#0277bd', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            <FaSwimmingPool style={{ marginRight: '6px', fontSize: '0.8rem' }} />
+                            {ship.pool_count}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <span style={{ background: '#fff4e6', color: '#e65100', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            <FaLayerGroup style={{ marginRight: '6px', fontSize: '0.8rem' }} />
+                            {ship.deck_count}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <span style={{ background: '#d4f4dd', color: '#1e7e34', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            {ship.restaurant_count}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          {ship.ship_image && (
+                            <img 
+                              src={`http://localhost/Project-I/backend/${ship.ship_image}`} 
+                              alt={ship.ship_name} 
+                              style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} 
+                            />
+                          )}
+                        </td>
+                        <td style={{ padding: '14px 12px', color: '#666' }}>{ship.class || '-'}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{ship.year_built || '-'}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                              style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer', transition: 'transform 0.2s' }}
+                              title="Edit"
+                              onClick={() => handleShowModal(ship)}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer', transition: 'transform 0.2s' }}
+                              title="Delete"
+                              onClick={() => handleDeleteShip(ship.ship_name)}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="9" className="text-center text-muted" style={{ padding: '40px' }}>
+                        <div style={{ fontSize: '1.1rem' }}>
+                          <FaShip style={{ fontSize: '3rem', opacity: 0.3, marginBottom: '1rem' }} />
+                          <div>No ships found</div>
+                          <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>
+                            {Object.values(filters).some(f => f)
+                              ? 'Try adjusting your filters'
+                              : 'Add your first ship to get started'
+                            }
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
+          </div>
         </div>
 
         {/* Add/Edit Modal */}

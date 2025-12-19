@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table, Card, Button, Form, Row, Col, Badge } from 'react-bootstrap';
-import { FaSwimmingPool, FaDownload, FaFilter, FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
+import { FaSwimmingPool, FaDownload, FaFilter, FaArrowLeft, FaSignOutAlt, FaUsers, FaDollarSign, FaCheckCircle } from 'react-icons/fa';
+import { useToast } from './hooks/useToast';
 import logo from './assets/logo.png';
 import './FacilitiesDashboard.css';
 
 function FacilitiesDashboard() {
   const navigate = useNavigate();
+  const { showConfirm } = useToast();
   const [facilitiesData, setFacilitiesData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,16 +42,15 @@ function FacilitiesDashboard() {
   };
 
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      // Clear any stored authentication data
+    showConfirm('Are you sure you want to logout?', () => {
       localStorage.removeItem('userToken');
       localStorage.removeItem('userRole');
       localStorage.removeItem('userId');
       sessionStorage.clear();
       
-      // Navigate to login page
+      navigate('/');
       navigate('/login');
-    }
+    });
   };
 
   useEffect(() => {
@@ -87,6 +88,11 @@ function FacilitiesDashboard() {
 
     setFilteredData(filtered);
   }, [facilitiesData, filters]);
+
+  // Calculate summary statistics
+  const totalBookings = filteredData.length;
+  const totalRevenue = filteredData.filter(item => item.status === 'paid').reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0);
+  const paidBookings = filteredData.filter(item => item.status === 'paid').length;
 
   useEffect(() => {
     applyFilters();
@@ -264,6 +270,60 @@ function FacilitiesDashboard() {
           </div>
         </section>
 
+        {/* Summary Cards */}
+        <div className="container mb-4">
+          <div className="row g-3">
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Bookings</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{totalBookings}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaUsers style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Facility reservations</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Revenue</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>${totalRevenue.toLocaleString()}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaDollarSign style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>From paid bookings</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Paid Bookings</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{paidBookings}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaCheckCircle style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Confirmed payments</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Main Content Card */}
         <div className="card booking-glass-effect mb-4 p-3 shadow-lg border-0" style={{ maxWidth: 1200, margin: '0 auto', background: '#fff', borderRadius: '15px' }}>
           {/* Filters */}
@@ -332,79 +392,85 @@ function FacilitiesDashboard() {
           </div>
 
           {/* Data Table */}
-          <div className="table-responsive">
-            <Table striped bordered hover className="facilities-table">
-              <thead className="table-info">
-                <tr>
-                  <th>Passenger Name</th>
-                  <th>Booking ID</th>
-                  <th>Facilities</th>
-                  <th>Status</th>
-                  <th>Total Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.length === 0 ? (
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
                   <tr>
-                    <td colSpan="5" className="text-center text-muted">
-                      No facility preferences found
-                    </td>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Passenger Name</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Booking ID</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Facilities</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Status</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Total Cost</th>
                   </tr>
-                ) : (
-                  filteredData.map(item => (
-                    <tr key={item.id}>
-                      <td>{item.passengerName}</td>
-                      <td>
-                        <Badge bg="secondary">{item.bookingId}</Badge>
-                      </td>
-                      <td>
-                        <div className="facilities-list">
-                          {item.facilities.map((facility, index) => (
-                            <div key={index} className="facility-item mb-2">
-                              <div className="d-flex justify-content-between align-items-center">
-                                <div>
-                                  <Badge 
-                                    bg={facility.cost === 0 ? 'success' : 'primary'}
-                                    className="facility-name-badge me-2"
-                                  >
-                                    {facility.name}
-                                  </Badge>
-                                  <Badge bg="secondary" className="quantity-badge">
-                                    {facility.quantity}
-                                  </Badge>
-                                </div>
-                                <div className="facility-cost">
-                                  {facility.cost === 0 ? (
-                                    <Badge bg="success">FREE</Badge>
-                                  ) : (
-                                    <span className="fw-bold text-primary">${facility.cost}</span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        {getStatusBadge(item.status)}
-                      </td>
-                      <td className="text-end fw-bold">
-                        <div className="total-cost-cell">
-                          <Badge bg="dark" className="total-badge">
-                            Total: ${item.totalCost}
-                          </Badge>
-                          <div className="mt-1">
-                            <small className="text-muted">
-                              {item.facilities.length} facility{item.facilities.length !== 1 ? 'ies' : ''}
-                            </small>
-                          </div>
+                </thead>
+                <tbody>
+                  {filteredData.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="text-center text-muted" style={{ padding: '40px' }}>
+                        <div style={{ fontSize: '1.1rem' }}>
+                          <FaSwimmingPool style={{ fontSize: '3rem', opacity: 0.3, marginBottom: '1rem' }} />
+                          <p className="mb-0">No facility preferences found</p>
+                          <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Try adjusting your filters</p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </Table>
+                  ) : (
+                    filteredData.map((item, index) => (
+                      <tr key={item.id} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                        <td style={{ padding: '14px 12px', fontWeight: '500' }}>{item.passengerName}</td>
+                        <td style={{ padding: '14px 12px' }}>
+                          <span style={{ background: '#e7f0ff', color: '#667eea', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            #{item.bookingId}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px' }}>
+                          <div>
+                            {item.facilities.map((facility, idx) => (
+                              <div key={idx} className="mb-2" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#f8f9fa', borderRadius: '8px', marginBottom: idx !== item.facilities.length - 1 ? '8px' : '0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <span style={{
+                                    background: facility.cost === 0 ? '#d4f4dd' : '#e7f0ff',
+                                    color: facility.cost === 0 ? '#1e7e34' : '#667eea',
+                                    padding: '4px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '500'
+                                  }}>
+                                    {facility.name}
+                                  </span>
+                                  <span style={{ background: '#fff', color: '#666', padding: '4px 10px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '500', border: '1px solid #e0e0e0' }}>
+                                    Qty: {facility.quantity}
+                                  </span>
+                                </div>
+                                <div>
+                                  {facility.cost === 0 ? (
+                                    <span style={{ background: '#d4f4dd', color: '#1e7e34', padding: '4px 10px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '600' }}>FREE</span>
+                                  ) : (
+                                    <span style={{ fontWeight: '600', color: '#1e7e34' }}>${facility.cost}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          {getStatusBadge(item.status)}
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'right' }}>
+                          <div>
+                            <div style={{ fontWeight: '700', fontSize: '1.1rem', color: '#1e7e34' }}>${item.totalCost}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                              {item.facilities.length} facility{item.facilities.length !== 1 ? 'ies' : ''}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>

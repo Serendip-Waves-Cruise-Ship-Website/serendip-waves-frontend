@@ -7,6 +7,9 @@ const DestinationsPage = () => {
   const [destinations, setDestinations] = useState([]);
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
+  const [selectedDestination, setSelectedDestination] = useState("any");
+  const [selectedShip, setSelectedShip] = useState("any");
+  const [selectedMonth, setSelectedMonth] = useState("any");
 
   useEffect(() => {
     const fetchItineraries = async () => {
@@ -20,6 +23,34 @@ const DestinationsPage = () => {
     };
     fetchItineraries();
   }, []);
+
+  // Auto-filter when dropdown selections change
+  useEffect(() => {
+    const term = search.trim().toLowerCase();
+
+    const filteredList = destinations.filter(dest => {
+      const matchesText = !term
+        ? true
+        : ((dest.route && dest.route.toLowerCase().includes(term)) ||
+           (dest.ship_name && dest.ship_name.toLowerCase().includes(term)));
+
+      const matchesDestination = selectedDestination === "any"
+        ? true
+        : (dest.route && dest.route.toLowerCase() === selectedDestination.toLowerCase());
+
+      const matchesShip = selectedShip === "any"
+        ? true
+        : (dest.ship_name && dest.ship_name.toLowerCase() === selectedShip.toLowerCase());
+
+      const matchesMonth = selectedMonth === "any"
+        ? true
+        : (dest.start_date && new Date(dest.start_date).getMonth() === parseInt(selectedMonth, 10));
+
+      return matchesText && matchesDestination && matchesShip && matchesMonth;
+    });
+
+    setFiltered(filteredList);
+  }, [selectedDestination, selectedShip, selectedMonth, search, destinations]);
 
   const calculateNights = (startDate, endDate) => {
     if (!startDate || !endDate) return null;
@@ -42,22 +73,36 @@ const DestinationsPage = () => {
 
   const handleSearch = () => {
     const term = search.trim().toLowerCase();
-    if (!term) {
-      setFiltered(destinations);
-      return;
-    }
-    setFiltered(destinations.filter(dest =>
-      (dest.route && dest.route.toLowerCase().includes(term)) ||
-      (dest.ship_name && dest.ship_name.toLowerCase().includes(term))
-    ));
+
+    const filteredList = destinations.filter(dest => {
+      const matchesText = !term
+        ? true
+        : ((dest.route && dest.route.toLowerCase().includes(term)) ||
+           (dest.ship_name && dest.ship_name.toLowerCase().includes(term)));
+
+      const matchesDestination = selectedDestination === "any"
+        ? true
+        : (dest.route && dest.route.toLowerCase() === selectedDestination.toLowerCase());
+
+      const matchesShip = selectedShip === "any"
+        ? true
+        : (dest.ship_name && dest.ship_name.toLowerCase() === selectedShip.toLowerCase());
+
+      const matchesMonth = selectedMonth === "any"
+        ? true
+        : (dest.start_date && new Date(dest.start_date).getMonth() === parseInt(selectedMonth, 10));
+
+      return matchesText && matchesDestination && matchesShip && matchesMonth;
+    });
+
+    setFiltered(filteredList);
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff' }}>
+    <div style={{ minHeight: '100vh', background: '#f3f6fd' }}>
       <section
         id="destinations"
         style={{
-          background: "#fff",
           padding: "3rem 0 3rem 0",
           minHeight: "100vh",
           width: "100%",
@@ -71,50 +116,93 @@ const DestinationsPage = () => {
       >
         
         <h2 className="text-center mb-2 fw-bold" style={{ 
-          fontSize: "clamp(1.8rem, 4vw, 2.5rem)",
-          marginBottom: '1rem'
+          fontSize: "clamp(2rem, 4vw, 2.6rem)",
+          marginBottom: '1.25rem',
+          color: '#111827'
         }}>
-          Featured Destinations
+          Find your perfect cruise
         </h2>
-        <p className="lead text-muted text-center mb-5" style={{ 
-          fontSize: "clamp(1rem, 2.5vw, 1.2rem)", 
-          maxWidth: 600, 
-          margin: "0 auto 2rem auto",
+        <p className="lead text-muted text-center mb-4" style={{ 
+          fontSize: "clamp(1rem, 2.5vw, 1.15rem)", 
+          maxWidth: 640, 
+          margin: "0 auto 2.25rem auto",
           padding: '0 1rem'
         }}>
-          Discover breathtaking destinations around the world with our premium cruise experiences
+          Filter by destination, ship, or month and explore stunning routes around the world.
         </p>
-        <div className="featured-search-card modern-search-bar">
-          <div className="modern-search-bar-inner">
-            <span className="modern-search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search by country or ship name..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="modern-search-input"
-              onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
-            />
-            <button
-              onClick={handleSearch}
-              className="modern-search-btn"
-            >
-              Search
-            </button>
+
+        {/* Search / Filter bar */}
+        <div className="featured-search-card cruise-filter-bar">
+          <div className="cruise-filter-inner">
+            <div className="cruise-filter-group">
+              <label className="cruise-filter-label">Destination</label>
+              <select
+                className="cruise-filter-select"
+                value={selectedDestination}
+                onChange={e => setSelectedDestination(e.target.value)}
+              >
+                <option value="any">Anywhere</option>
+                {Array.from(new Set(destinations.map(d => d.route).filter(Boolean))).map((route, idx) => (
+                  <option key={idx} value={route}>{route}</option>
+                ))}
+              </select>
+            </div>
+            <div className="cruise-filter-group">
+              <label className="cruise-filter-label">Cruise ship</label>
+              <select
+                className="cruise-filter-select"
+                value={selectedShip}
+                onChange={e => setSelectedShip(e.target.value)}
+              >
+                <option value="any">Any ship</option>
+                {Array.from(new Set(destinations.map(d => d.ship_name).filter(Boolean))).map((ship, idx) => (
+                  <option key={idx} value={ship}>{ship}</option>
+                ))}
+              </select>
+            </div>
+            <div className="cruise-filter-group">
+              <label className="cruise-filter-label">Month</label>
+              <select
+                className="cruise-filter-select"
+                value={selectedMonth}
+                onChange={e => setSelectedMonth(e.target.value)}
+              >
+                <option value="any">Any month</option>
+                {[0,1,2,3,4,5,6,7,8,9,10,11].map(m => (
+                  <option key={m} value={m}>{new Date(2025, m, 1).toLocaleString('en-US', { month: 'long' })}</option>
+                ))}
+              </select>
+            </div>
+
           </div>
         </div>
-        
-        {/* Responsive Destinations Grid */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '2rem',
-          width: '100%',
-          maxWidth: 1200,
-          margin: '0 auto',
-        }}>
+
+        {/* No Results Message */}
+        {filtered.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 2rem',
+            color: '#64748b',
+            fontSize: '1.1rem'
+          }}>
+            <div style={{
+              fontSize: '3rem',
+              marginBottom: '1rem',
+              opacity: 0.5
+            }}>🔍</div>
+            <h3 style={{ color: '#334155', marginBottom: '0.5rem' }}>No cruises found</h3>
+            <p>Try adjusting your filters to see more results</p>
+          </div>
+        )}
+
+        {/* Featured Destinations Row */}
+        <div className="destinations-card-row">
           {filtered.map((dest, idx) => {
             const calculatedNights = calculateNights(dest.start_date, dest.end_date);
+            const startingPriceRaw = dest.starting_price ?? dest.price;
+            const startingPrice = startingPriceRaw && !isNaN(startingPriceRaw)
+              ? Number(startingPriceRaw)
+              : null;
             return (
               <Link
                 key={idx}
@@ -122,21 +210,31 @@ const DestinationsPage = () => {
                 state={{ destination: dest }}
                 style={{ textDecoration: 'none' }}
               >
-                <div className="destination-card">
+                <div className="destination-card destination-card-tall">
                   <img
-                    className="destination-image"
+                    className="destination-image destination-image-cover"
                     src={dest.country_image ? `http://localhost/Project-I/backend/${dest.country_image}` : '/assets/default.jpg'}
                     alt={dest.route}
                   />
-                  <div className="destination-overlay">
-                    <div className="destination-title">{dest.route}</div>
-                    <div className="destination-desc">{dest.description}</div>
-                    {(dest.start_date && dest.end_date) && (
-                      <div className="destination-dates mt-2" style={{fontSize: '1.05rem', fontWeight: 500, color: '#ffd600'}}>
-                        <span>Trip Dates: </span>
-                        <span>{formatDate(dest.start_date)} &ndash; {formatDate(dest.end_date)}</span>
+                  <div className="destination-overlay destination-overlay-bottom">
+                    {calculatedNights && (
+                      <div className="destination-nights">
+                        {calculatedNights} NIGHT{calculatedNights > 1 ? 'S' : ''}
                       </div>
                     )}
+                    <div className="destination-title-large">{dest.route}</div>
+                    {startingPrice !== null && (
+                      <div className="destination-price-label">STARTING FROM</div>
+                    )}
+                    {startingPrice !== null && (
+                      <div className="destination-price">${startingPrice.toLocaleString()}</div>
+                    )}
+                    <button
+                      type="button"
+                      className="destination-explore-btn"
+                    >
+                      Explore
+                    </button>
                   </div>
                 </div>
               </Link>
@@ -152,16 +250,6 @@ const DestinationsPage = () => {
         </svg>
       </div>
       <style>{`
-        body, #destinations {
-          background: linear-gradient(-45deg, #a1c4fd, #c2e9fb, #fbc2eb, #fcb69f);
-          background-size: 400% 400%;
-          animation: gradientBG 18s ease infinite;
-        }
-        @keyframes gradientBG {
-          0% {background-position: 0% 50%;}
-          50% {background-position: 100% 50%;}
-          100% {background-position: 0% 50%;}
-        }
         #destinations {
           position: relative;
           min-height: 60vh;
@@ -172,118 +260,211 @@ const DestinationsPage = () => {
           justify-content: flex-start;
           padding-top: 110px;
           padding-bottom: 3rem;
-          background: #fff !important;
+          background: transparent;
         }
         @media (min-width: 900px) {
           #destinations {
             min-height: 70vh;
           }
         }
-        .modern-search-bar {
-          background: rgba(255,255,255,0.85);
-          border-radius: 22px;
-          box-shadow: 0 4px 24px 0 rgba(30,58,138,0.10);
-          padding: 18px 18px;
-          max-width: 540px;
+        .cruise-filter-bar {
+          background: #fefefe;
+          border-radius: 28px;
+          box-shadow: 0 18px 45px rgba(15,23,42,0.12);
+          padding: 18px 22px;
+          max-width: 1050px;
           margin: 0 auto 2.5rem auto;
-          display: flex;
+        }
+        .cruise-filter-inner {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
           align-items: center;
-          justify-content: center;
         }
-        .modern-search-bar-inner {
+        .cruise-filter-group {
           display: flex;
-          align-items: center;
-          width: 100%;
-          gap: 0.5rem;
+          flex-direction: column;
+          gap: 4px;
         }
-        .modern-search-icon {
-          font-size: 1.5rem;
-          color: #2563eb;
-          margin-right: 0.5rem;
-          margin-left: 0.5rem;
+        .cruise-filter-label {
+          font-size: 0.85rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: #6b7280;
         }
-        .modern-search-input {
-          flex: 1;
-          padding: 14px 16px 14px 12px;
-          border: none;
-          border-radius: 16px;
-          font-size: 1.1rem;
-          background: #f3f6fd;
-          color: #222;
-          box-shadow: 0 2px 8px rgba(58,90,152,0.07);
+        .cruise-filter-select {
+          border-radius: 999px;
+          border: 1px solid #e5e7eb;
+          padding: 10px 16px;
+          font-size: 0.98rem;
+          color: #111827;
+          background: #f9fafb;
           outline: none;
-          transition: box-shadow 0.2s;
+          transition: box-shadow 0.15s, border-color 0.15s, background 0.15s;
         }
-        .modern-search-input:focus {
-          box-shadow: 0 4px 16px rgba(58,90,152,0.13);
+        .cruise-filter-select:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
+          background: #ffffff;
         }
-        .modern-search-btn {
-          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-          color: #fff;
-          font-weight: 700;
+        .cruise-filter-btn {
+          align-self: stretch;
+          border-radius: 999px;
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 40%, #0f172a 100%);
           border: none;
-          border-radius: 16px;
-          padding: 14px 32px;
-          font-size: 1.1rem;
+          color: #f9fafb;
+          font-weight: 700;
+          font-size: 0.98rem;
+          padding: 12px 20px;
           cursor: pointer;
-          transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-          box-shadow: 0 2px 8px rgba(58,90,152,0.07);
+          box-shadow: 0 10px 30px rgba(37,99,235,0.35);
+          transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+          white-space: nowrap;
         }
-        .modern-search-btn:hover {
-          background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
-          color: #ffd600;
+        .cruise-filter-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 16px 40px rgba(37,99,235,0.45);
         }
-        @media (max-width: 700px) {
-          .featured-search-card {
-            padding: 18px 6px;
-            max-width: 98vw;
+        .cruise-filter-btn:active {
+          transform: translateY(0px) scale(0.99);
+          box-shadow: 0 8px 22px rgba(30,64,175,0.4);
+        }
+        @media (max-width: 900px) {
+          .cruise-filter-inner {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
-          .featured-search-btn {
-            padding: 12px 18px;
-            font-size: 1rem;
+          .cruise-filter-btn {
+            grid-column: span 2 / span 2;
+            width: 100%;
           }
         }
+        @media (max-width: 600px) {
+          .cruise-filter-bar {
+            border-radius: 20px;
+            padding: 14px 14px;
+          }
+          .cruise-filter-inner {
+            grid-template-columns: 1fr;
+          }
+          .cruise-filter-btn {
+            grid-column: span 1 / span 1;
+          }
+        }
+
+        .destinations-card-row {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 18px;
+          width: 100%;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        @media (max-width: 1100px) {
+          .destinations-card-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+        @media (max-width: 900px) {
+          .destinations-card-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+        @media (max-width: 600px) {
+          .destinations-card-row {
+            grid-template-columns: 1fr;
+          }
+        }
+
         .destination-card {
-          background: #fff;
-          border-radius: 18px;
-          box-shadow: 0 2px 16px rgba(30,58,138,0.10);
+          background: #111827;
+          border-radius: 22px;
           overflow: hidden;
-          transition: transform 0.18s, box-shadow 0.18s;
-          margin-bottom: 32px;
           position: relative;
+          box-shadow: 0 18px 45px rgba(15,23,42,0.45);
+          transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+          cursor: pointer;
+        }
+        .destination-card-tall {
+          height: 480px;
         }
         .destination-card:hover {
-          transform: translateY(-8px) scale(1.03);
-          box-shadow: 0 8px 32px rgba(30,58,138,0.18);
+          transform: translateY(-10px);
+          box-shadow: 0 24px 70px rgba(15,23,42,0.7);
         }
-        .destination-image {
+        .destination-image-cover {
           width: 100%;
-          height: 220px;
+          height: 100%;
           object-fit: cover;
-          border-radius: 18px 18px 0 0;
-          transition: filter 0.2s;
+          filter: brightness(0.85);
+          transition: transform 0.22s ease-out, filter 0.22s ease-out;
         }
-        .destination-card:hover .destination-image {
-          filter: brightness(0.92) blur(1px);
+        .destination-card:hover .destination-image-cover {
+          transform: scale(1.04);
+          filter: brightness(0.95);
         }
-        .destination-overlay {
+        .destination-overlay-bottom {
           position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          background: linear-gradient(0deg, rgba(30,58,138,0.7) 0%, rgba(30,58,138,0.0) 100%);
-          color: #fff;
-          padding: 18px 24px 12px 24px;
-          border-radius: 0 0 18px 18px;
+          inset: auto 0 0 0;
+          padding: 30px 22px 28px 22px;
+          background: linear-gradient(180deg, rgba(15,23,42,0) 0%, rgba(15,23,42,0.9) 35%, rgba(15,23,42,1) 100%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          text-align: center;
         }
-        .destination-title {
-          font-size: 1.5rem;
+        .destination-nights {
+          font-size: 0.8rem;
           font-weight: 700;
-          margin-bottom: 6px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(243,244,246,0.9);
         }
-        .destination-desc {
-          font-size: 1.05rem;
-          opacity: 0.92;
+        .destination-title-large {
+          font-size: 1.45rem;
+          font-weight: 800;
+          color: #f9fafb;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .destination-price-label {
+          margin-top: 4px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(209,213,219,0.9);
+        }
+        .destination-price {
+          font-size: 1.5rem;
+          font-weight: 900;
+          color: #f9fafb;
+        }
+        .destination-explore-btn {
+          margin-top: 14px;
+          align-self: stretch;
+          border-radius: 999px;
+          border: none;
+          background: #fbbf24;
+          color: #111827;
+          font-weight: 800;
+          font-size: 0.98rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 10px 0;
+          box-shadow: 0 12px 30px rgba(251,191,36,0.45);
+          cursor: pointer;
+          transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, background 0.14s ease-out;
+        }
+        .destination-explore-btn:hover {
+          background: #f59e0b;
+          transform: translateY(-1px);
+          box-shadow: 0 18px 40px rgba(245,158,11,0.55);
+        }
+        .destination-explore-btn:active {
+          transform: translateY(0) scale(0.99);
+          box-shadow: 0 10px 24px rgba(208,138,4,0.55);
         }
       `}</style>
     </div>

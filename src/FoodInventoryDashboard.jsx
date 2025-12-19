@@ -382,67 +382,85 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
             </Row>
           </div>
           {/* Inventory Table */}
-          <div className="table-responsive">
-            <Table striped bordered hover className="align-middle food-table luxury-table">
-              <thead className="table-primary sticky-top luxury-thead">
-                <tr>
-                  <th>Meal Title</th>
-                  <th>Type</th>
-                  <th>Quantity in Stock</th>
-                  <th>Unit Price</th>
-                  <th>Total Price</th>
-                  <th>Expiry Date</th>
-                  <th>Supplier Name</th>
-                  <th>Supplier Contacts</th>
-                  <th>Supplier Email</th>
-                  <th>Stock Status</th>
-                  <th>Item Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.length === 0 ? (
-                  <tr><td colSpan={12} className="text-center">No meal items found.</td></tr>
-                ) : (
-                  filteredData.map(item => {
-                    const status = getStatus(item);
-                    const totalPrice = Number(item.quantity) * Number(item.unitPrice || 0);
-                    return (
-                      <tr key={item.id} className={item.item_status === 'inactive' ? 'table-secondary' : ''}>
-                        <td>{item.itemName}</td>
-                        <td>{item.category}</td>
-                        <td>{item.quantity} {item.unit}</td>
-                        <td>{item.unitPrice ? `Rs. ${item.unitPrice}` : '-'}</td>
-                        <td>{item.unitPrice ? `Rs. ${totalPrice}` : '-'}</td>
-                        <td>{item.expiryDate}</td>
-                        <td>{item.supplier}</td>
-                        <td>{item.supplierContacts || '-'}</td>
-                        <td>{item.supplierEmail || '-'}</td>
-                        <td>{getStatusBadge(status)}</td>
-                        <td>
-                          <Badge bg={item.item_status === 'active' ? 'success' : 'secondary'}>
-                            {item.item_status === 'active' ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </td>
-                        <td>
-                          <Button size="sm" variant="outline-primary" className="me-2" onClick={() => handleShowModal('edit', item)}>
-                            <FaEdit />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant={item.item_status === 'active' ? 'outline-warning' : 'outline-success'} 
-                            onClick={() => handleDelete(item.id)}
-                            title={item.item_status === 'active' ? 'Deactivate Item' : 'Activate Item'}
-                          >
-                            {item.item_status === 'active' ? <FaToggleOff /> : <FaToggleOn />}
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                <thead style={{ background: '#6c5ce7', borderBottom: 'none', position: 'sticky', top: 0, zIndex: 10 }}>
+                  <tr>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Meal Title</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Type</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Quantity</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Unit Price</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Total Price</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Expiry Date</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Supplier</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Contact</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Email</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Stock Status</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Status</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.length === 0 ? (
+                    <tr>
+                      <td colSpan={12} className="text-center text-muted" style={{ padding: '40px' }}>
+                        <div style={{ fontSize: '1.1rem' }}>No meal items found</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredData.map((item, index) => {
+                      const status = getStatus(item);
+                      const totalPrice = Number(item.quantity) * Number(item.unitPrice || 0);
+                      return (
+                        <tr key={item.id} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef', opacity: item.item_status === 'inactive' ? 0.6 : 1 }}>
+                          <td style={{ padding: '14px 12px', fontWeight: '500' }}>{item.itemName}</td>
+                          <td style={{ padding: '14px 12px' }}>
+                            <span style={{ background: '#e7f0ff', color: '#667eea', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                              {item.category}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{item.quantity} {item.unit}</td>
+                          <td style={{ padding: '14px 12px', textAlign: 'right', color: '#666' }}>{item.unitPrice ? `$ ${item.unitPrice}` : '-'}</td>
+                          <td style={{ padding: '14px 12px', textAlign: 'right', fontWeight: '600', color: '#1e7e34' }}>{item.unitPrice ? `$ ${totalPrice.toLocaleString()}` : '-'}</td>
+                          <td style={{ padding: '14px 12px' }}>{item.expiryDate}</td>
+                          <td style={{ padding: '14px 12px' }}>{item.supplier}</td>
+                          <td style={{ padding: '14px 12px', color: '#666' }}>{item.supplierContacts || '-'}</td>
+                          <td style={{ padding: '14px 12px', color: '#666' }}>{item.supplierEmail || '-'}</td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>{getStatusBadge(status)}</td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                            <Badge bg={item.item_status === 'active' ? 'success' : 'secondary'}>
+                              {item.item_status === 'active' ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                              <button
+                                style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                onClick={() => handleShowModal('edit', item)}
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                              >
+                                <FaEdit />
+                              </button>
+                              <button
+                                style={{ background: item.item_status === 'active' ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                onClick={() => handleDelete(item.id)}
+                                title={item.item_status === 'active' ? 'Deactivate Item' : 'Activate Item'}
+                                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                              >
+                                {item.item_status === 'active' ? <FaToggleOff /> : <FaToggleOn />}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
             </Table>
+            </div>
           </div>
         </div>
         {/* Modal */}
@@ -503,7 +521,7 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-2">
-                    <Form.Label>Unit Price (Rs.)</Form.Label>
+                    <Form.Label>Unit Price ($)</Form.Label>
                     <Form.Control name="unitPrice" type="number" min="0" value={form.unitPrice} onChange={handleFormChange} />
                   </Form.Group>
                 </Col>
@@ -542,8 +560,8 @@ function FoodInventoryDashboard({ userRole = 'Super Admin' }) {
                 <p><strong>Meal Title:</strong> {detailsItem.itemName}</p>
                 <p><strong>Type:</strong> {detailsItem.category}</p>
                 <p><strong>Quantity:</strong> {detailsItem.quantity} {detailsItem.unit}</p>
-                <p><strong>Unit Price:</strong> {detailsItem.unitPrice ? `Rs. ${detailsItem.unitPrice}` : '-'}</p>
-                <p><strong>Total Price:</strong> {detailsItem.unitPrice ? `Rs. ${Number(detailsItem.quantity) * Number(detailsItem.unitPrice || 0)}` : '-'}</p>
+                <p><strong>Unit Price:</strong> {detailsItem.unitPrice ? `$ ${detailsItem.unitPrice}` : '-'}</p>
+                <p><strong>Total Price:</strong> {detailsItem.unitPrice ? `$ ${Number(detailsItem.quantity) * Number(detailsItem.unitPrice || 0)}` : '-'}</p>
                 <p><strong>Expiry Date:</strong> {detailsItem.expiryDate}</p>
                 <p><strong>Supplier:</strong> {detailsItem.supplier}</p>
                 <p><strong>Supplier Contacts:</strong> {detailsItem.supplierContacts || '-'}</p>

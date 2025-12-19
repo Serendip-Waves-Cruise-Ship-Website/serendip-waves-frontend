@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Table, Form, Row, Col } from 'react-bootstrap';
-import { FaTrash, FaShip, FaUser, FaBed, FaCalendarAlt } from 'react-icons/fa';
+import { FaTrash, FaShip, FaUser, FaBed, FaCalendarAlt, FaBook, FaDollarSign, FaChartLine } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './BookingOverviewPage.css';
 import logo from './assets/logo.png';
@@ -61,6 +61,11 @@ function BookingOverviewPage() {
     const matchesDateTo = !filters.dateTo || (b.booking_date && b.booking_date <= filters.dateTo);
     return matchesSearch && matchesCruise && matchesCabinType && matchesDateFrom && matchesDateTo;
   });
+
+  // Calculate summary statistics
+  const totalBookings = filteredBookings.length;
+  const totalRevenue = filteredBookings.reduce((sum, b) => sum + (parseFloat(b.total_price) || 0), 0);
+  const avgBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
 
   // Handle filter changes
   const handleFilterChange = e => {
@@ -173,6 +178,59 @@ function BookingOverviewPage() {
             </p>
           </div>
         </section>
+        
+        {/* Summary Cards */}
+        <div className="row g-3 mb-4" style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div className="col-md-4">
+            <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '16px' }}>
+              <div className="card-body text-white p-4">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Bookings</p>
+                    <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{totalBookings}</h3>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                    <FaBook style={{ fontSize: '1.8rem' }} />
+                  </div>
+                </div>
+                <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Active cruise reservations</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '16px' }}>
+              <div className="card-body text-white p-4">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Revenue</p>
+                    <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>${totalRevenue.toLocaleString()}</h3>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                    <FaDollarSign style={{ fontSize: '1.8rem' }} />
+                  </div>
+                </div>
+                <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>From all bookings</p>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-4">
+            <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', borderRadius: '16px' }}>
+              <div className="card-body text-white p-4">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Avg Booking Value</p>
+                    <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>${avgBookingValue.toFixed(0).toLocaleString()}</h3>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                    <FaChartLine style={{ fontSize: '1.8rem' }} />
+                  </div>
+                </div>
+                <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Per reservation</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Filters Section with Add Booking button on the right */}
         <div className="card booking-glass-effect mb-4 p-3 shadow-lg border-0" style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3">
@@ -222,52 +280,88 @@ function BookingOverviewPage() {
           </div>
         </div>
         {/* Booking Table */}
-        <div className="table-responsive" style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <Table striped hover bordered className="align-middle shadow-sm" style={{ background: '#fff', borderRadius: 15 }}>
-            <thead className="table-dark">
-              <tr>
-                <th>Booking ID</th>
-                <th>Passenger Name</th>
-                <th>Cruise Title</th>
-                <th>Cabin Number</th>
-                <th>Cabin Type</th>
-                <th>Guests</th>
-                <th>Booking Date</th>
-                <th>Total Price</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.length === 0 ? (
-                <tr><td colSpan={9} className="text-center">No bookings found.</td></tr>
-              ) : (
-                filteredBookings.map(b => (
-                  <tr key={b.booking_id}>
-                    <td>{b.booking_id}</td>
-                    <td>{b.full_name}</td>
-                    <td>{b.ship_name}</td>
-                    <td>{b.cabin_number}</td>
-                    <td>{b.room_type}</td>
-                    <td>{b.number_of_guests}</td>
-                    <td>{b.booking_date ? new Date(b.booking_date).toLocaleDateString() : ''}</td>
-                    <td>${parseFloat(b.total_price || 0).toLocaleString()}</td>
-                    <td>
-                      <div className="action-buttons">
+        <div className="card shadow-sm border-0" style={{ maxWidth: 1200, margin: '0 auto', borderRadius: '16px', overflow: 'hidden' }}>
+          <div className="table-responsive">
+            <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+              <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
+                <tr>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Booking ID</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Passenger Name</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Cruise Title</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Cabin No.</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Cabin Type</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Guests</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Booking Date</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Total Price</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredBookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="text-center text-muted" style={{ padding: '40px' }}>
+                      <div style={{ fontSize: '1.1rem' }}>
+                        <FaBook style={{ fontSize: '3rem', opacity: 0.3, marginBottom: '1rem' }} />
+                        <p className="mb-0">No bookings found</p>
+                        <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Try adjusting your filters</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBookings.map((b, index) => (
+                    <tr key={b.booking_id} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                      <td style={{ padding: '14px 12px' }}>
+                        <span style={{ fontWeight: '600', color: '#667eea' }}>#{b.booking_id}</span>
+                      </td>
+                      <td style={{ padding: '14px 12px', fontWeight: '500' }}>{b.full_name}</td>
+                      <td style={{ padding: '14px 12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <FaShip style={{ color: '#667eea', fontSize: '0.9rem' }} />
+                          <span>{b.ship_name}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                        <span style={{ background: '#e7f0ff', color: '#667eea', padding: '4px 12px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                          {b.cabin_number}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 12px' }}>
+                        <span style={{ 
+                          background: b.room_type === 'Suite' ? '#d4f4dd' : b.room_type === 'Balcony' ? '#fff4e6' : b.room_type === 'Ocean View' ? '#e3f2fd' : '#f5f5f5',
+                          color: b.room_type === 'Suite' ? '#1e7e34' : b.room_type === 'Balcony' ? '#e65100' : b.room_type === 'Ocean View' ? '#0277bd' : '#555',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          fontSize: '0.85rem',
+                          fontWeight: '500'
+                        }}>
+                          {b.room_type}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{b.number_of_guests}</td>
+                      <td style={{ padding: '14px 12px', color: '#666' }}>
+                        <FaCalendarAlt style={{ marginRight: '6px', fontSize: '0.85rem', color: '#667eea' }} />
+                        {b.booking_date ? new Date(b.booking_date).toLocaleDateString() : '-'}
+                      </td>
+                      <td style={{ padding: '14px 12px', textAlign: 'right', fontWeight: '600', color: '#1e7e34', fontSize: '1rem' }}>
+                        ${parseFloat(b.total_price || 0).toLocaleString()}
+                      </td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center' }}>
                         <Button
                           size="sm"
                           variant="outline-danger"
                           onClick={() => handleDelete(b.booking_id)}
                           title="Delete Booking"
+                          style={{ borderRadius: '8px', padding: '6px 12px' }}
                         >
                           <FaTrash />
                         </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </Table>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
+          </div>
         </div>
       </div>
       {/* Logout Confirmation Modal */}

@@ -386,53 +386,62 @@ function MealsDashboard() {
             </Card>
 
             {/* Data Table */}
-            <div className="table-responsive">
-              <Table striped bordered hover className="meals-table">
-                <thead className="table-primary">
-                  <tr>
-                    <th>Passenger Name</th>
-                    <th>Booking ID</th>
-                    <th>Meal Type</th>
-                    <th>Meal Times</th>
-                    <th>Days</th>
-                    <th>Notes/Allergies</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.length === 0 ? (
+            <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+              <div className="table-responsive">
+                <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                  <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
                     <tr>
-                      <td colSpan="6" className="text-center text-muted">
-                        No meal preferences found
-                      </td>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Passenger Name</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Booking ID</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Meal Type</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Meal Times</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Days</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Notes/Allergies</th>
                     </tr>
-                  ) : (
-                    filteredData.map(item => (
-                      <tr key={item.id}>
-                        <td>{item.passengerName}</td>
-                        <td>
-                          <Badge bg="secondary">{item.bookingId}</Badge>
+                  </thead>
+                  <tbody>
+                    {filteredData.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center text-muted" style={{ padding: '40px' }}>
+                          <div style={{ fontSize: '1.1rem' }}>No meal preferences found</div>
                         </td>
-                        <td>
-                          <Badge 
-                            bg={item.mealType === 'Basic/Vegetarian' ? 'success' : 'warning'}
-                          >
-                            {item.mealType}
-                          </Badge>
-                        </td>
-                        <td>
-                          {item.mealTimes.map((time, index) => (
-                            <Badge key={index} bg="primary" className="me-1 mb-1">
-                              {time}
-                            </Badge>
-                          ))}
-                        </td>
-                        <td className="text-center">{item.days}</td>
-                        <td>{item.notes || '-'}</td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </Table>
+                    ) : (
+                      filteredData.map((item, index) => (
+                        <tr key={item.id} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                          <td style={{ padding: '14px 12px', fontWeight: '500' }}>{item.passengerName}</td>
+                          <td style={{ padding: '14px 12px' }}>
+                            <span style={{ background: '#e7f0ff', color: '#667eea', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>#{item.bookingId}</span>
+                          </td>
+                          <td style={{ padding: '14px 12px' }}>
+                            <span style={{ 
+                              background: item.mealType === 'Basic/Vegetarian' ? '#d4f4dd' : '#fff4e6',
+                              color: item.mealType === 'Basic/Vegetarian' ? '#1e7e34' : '#e65100',
+                              padding: '6px 14px',
+                              borderRadius: '12px',
+                              fontSize: '0.85rem',
+                              fontWeight: '500'
+                            }}>
+                              {item.mealType}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px 12px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                              {item.mealTimes.map((time, idx) => (
+                                <span key={idx} style={{ background: '#e7f0ff', color: '#667eea', padding: '4px 12px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: '500' }}>
+                                  {time}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{item.days}</td>
+                          <td style={{ padding: '14px 12px', color: '#666' }}>{item.notes || '-'}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </div>
             </div>
           </Card.Body>
         </Card>

@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Table, Button, Modal, Form, Spinner, Alert } from 'react-bootstrap';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { FaPlus, FaTimes } from 'react-icons/fa';
 import { AuthContext } from './AuthContext';
+import { useToast } from './hooks/useToast';
 import logo from './assets/logo.png';
+import './itinerary.css';
 
 const DynamicPricing = () => {
   const { logout } = useContext(AuthContext);
+  const { showConfirm } = useToast();
   const [filteredPricing, setFilteredPricing] = useState([]);
   const [_itineraries, _setItineraries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,9 +22,7 @@ const DynamicPricing = () => {
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState({
     shipName: searchParams.get('ship') || '',
-    route: searchParams.get('route') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || ''
+    route: searchParams.get('route') || ''
   });
   
   const [availableShips, setAvailableShips] = useState([]);
@@ -40,9 +42,7 @@ const DynamicPricing = () => {
     // Load initial data and apply any URL filters
     const initialFilters = {
       shipName: searchParams.get('ship') || '',
-      route: searchParams.get('route') || '',
-      minPrice: searchParams.get('minPrice') || '',
-      maxPrice: searchParams.get('maxPrice') || ''
+      route: searchParams.get('route') || ''
     };
     
     setFilters(initialFilters);
@@ -58,18 +58,14 @@ const DynamicPricing = () => {
       
       if (filters.shipName) params.set('ship', filters.shipName);
       if (filters.route) params.set('route', filters.route);
-      if (filters.minPrice) params.set('minPrice', filters.minPrice);
-      if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
       
-      // Update URL without causing a page reload
       const newSearch = params.toString();
       const currentSearch = searchParams.toString();
       
       if (newSearch !== currentSearch) {
-        // Don't use replace: true to maintain browser history for back navigation
         setSearchParams(params);
       }
-    }, 300); // 300ms debounce
+    }, 300);
     
     return () => clearTimeout(timeoutId);
   }, [filters, setSearchParams, searchParams]);
@@ -84,11 +80,8 @@ const DynamicPricing = () => {
   const clearFilters = () => {
     setFilters({
       shipName: '',
-      route: '',
-      minPrice: '',
-      maxPrice: ''
+      route: ''
     });
-    // Clear URL parameters while maintaining browser history
     setSearchParams({});
   };
 
@@ -243,7 +236,7 @@ const DynamicPricing = () => {
   };
 
   const handleDelete = async (item) => {
-    if (window.confirm('Are you sure you want to delete this pricing item?')) {
+    showConfirm('Are you sure you want to delete this pricing item?', async () => {
       try {
         const res = await fetch('http://localhost/Project-I/backend/deleteCabinTypePricing.php', {
           method: 'POST',
@@ -259,16 +252,14 @@ const DynamicPricing = () => {
       } catch {
         setError('Error deleting pricing');
       }
-    }
+    });
   };
 
   const handleLogoutClick = () => {
-    // Show confirmation dialog before logout
-    if (window.confirm('Are you sure you want to logout?')) {
-      // Use AuthContext logout function and then navigate
+    showConfirm('Are you sure you want to logout?', () => {
       logout();
       navigate('/');
-    }
+    });
   };
 
   return (
@@ -310,43 +301,15 @@ const DynamicPricing = () => {
         </div>
       </div>
       {/* End Custom Navbar */}
-      <div style={{ marginTop: '80px', padding: '2rem' }}>
+      <div style={{ marginTop: '80px', width: '100%' }}>
         {/* Filter Section */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '15px',
-          padding: '25px',
-          marginBottom: '30px',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
-        }}>
-          <h3 style={{
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: '#333',
-            marginBottom: '20px'
-          }}>Filter Pricing</h3>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '20px',
-            alignItems: 'end'
-          }}>
-            <div style={{ flex: '1', minWidth: '200px' }}>
-              <label style={{
-                fontWeight: '600',
-                color: '#555',
-                marginBottom: '8px',
-                display: 'block'
-              }}>Ship Name</label>
+        <div className="filter-section container" style={{ marginBottom: '2rem' }}>
+          <h3 className="filter-title">Filter Pricing</h3>
+          <div className="filter-row">
+            <div className="filter-group">
+              <label className="filter-label">Ship Name</label>
               <select
-                style={{
-                  width: '100%',
-                  padding: '10px 15px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.3s'
-                }}
+                className="filter-input"
                 value={filters.shipName}
                 onChange={(e) => handleFilterChange('shipName', e.target.value)}
               >
@@ -356,22 +319,10 @@ const DynamicPricing = () => {
                 ))}
               </select>
             </div>
-            <div style={{ flex: '1', minWidth: '200px' }}>
-              <label style={{
-                fontWeight: '600',
-                color: '#555',
-                marginBottom: '8px',
-                display: 'block'
-              }}>Route</label>
+            <div className="filter-group">
+              <label className="filter-label">Route</label>
               <select
-                style={{
-                  width: '100%',
-                  padding: '10px 15px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.3s'
-                }}
+                className="filter-input"
                 value={filters.route}
                 onChange={(e) => handleFilterChange('route', e.target.value)}
               >
@@ -381,115 +332,59 @@ const DynamicPricing = () => {
                 ))}
               </select>
             </div>
-            <div style={{ flex: '1', minWidth: '150px' }}>
-              <label style={{
-                fontWeight: '600',
-                color: '#555',
-                marginBottom: '8px',
-                display: 'block'
-              }}>Min Price</label>
-              <input
-                type="number"
-                placeholder="Min Price"
-                style={{
-                  width: '100%',
-                  padding: '10px 15px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.3s'
-                }}
-                value={filters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-              />
-            </div>
-            <div style={{ flex: '1', minWidth: '150px' }}>
-              <label style={{
-                fontWeight: '600',
-                color: '#555',
-                marginBottom: '8px',
-                display: 'block'
-              }}>Max Price</label>
-              <input
-                type="number"
-                placeholder="Max Price"
-                style={{
-                  width: '100%',
-                  padding: '10px 15px',
-                  border: '2px solid #e9ecef',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  transition: 'border-color 0.3s'
-                }}
-                value={filters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'end' }}>
-              <Button 
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontWeight: '600',
-                  color: 'white'
-                }}
-                onClick={applyFilters}
-              >
-                Filter
-              </Button>
-              <Button 
-                style={{
-                  background: '#6c757d',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontWeight: '600',
-                  color: 'white'
-                }}
-                onClick={clearFilters}
-              >
-                Clear
-              </Button>
+            <div className="filter-group">
+              <div className="filter-actions">
+                <Button className="clear-btn" onClick={clearFilters}>
+                  <FaTimes /> Clear
+                </Button>
+              </div>
             </div>
           </div>
         </div>
         
-        <h2>Dynamic Cabin Type Pricing</h2>
-        {error && <Alert variant="danger">{error}</Alert>}
-        <Button variant="success" className="mb-3" onClick={() => {
-          setEditItem(null);
-          resetModalState();
-          setShowModal(true);
-        }}>
-          Add Pricing
-        </Button>
-        {loading ? (
-          <Spinner animation="border" />
-        ) : (
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Ship Name</th>
-                <th>Route</th>
-                <th>Interior</th>
-                <th>Ocean View</th>
-                <th>Balcony</th>
-                <th>Suite</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPricing.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{item.ship_name}</td>
-                  <td>{item.route}</td>
-                  <td>{item.interior_price}</td>
-                  <td>{item.ocean_view_price}</td>
-                  <td>{item.balcony_price}</td>
-                  <td>{item.suite_price}</td>
-                  <td>
+        <div className="container">
+          <div className="table-header mb-3 d-flex justify-content-between align-items-center">
+            <h3 className="table-title mb-0">Dynamic Cabin Type Pricing</h3>
+            <Button className="add-btn" onClick={() => {
+              setEditItem(null);
+              resetModalState();
+              setShowModal(true);
+            }}>
+              <FaPlus /> Add Pricing
+            </Button>
+          </div>
+          
+          {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
+          
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              {loading ? (
+                <div className="text-center p-5">
+                  <Spinner animation="border" />
+                </div>
+              ) : (
+                <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                  <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
+                    <tr>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Ship Name</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Route</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Interior</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Ocean View</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Balcony</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Suite</th>
+                      <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPricing.map((item, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid #f1f3f5' }}>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{item.ship_name}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>{item.route}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', color: '#2c3e50' }}>${item.interior_price}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', color: '#2c3e50' }}>${item.ocean_view_price}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', color: '#2c3e50' }}>${item.balcony_price}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', color: '#2c3e50' }}>${item.suite_price}</td>
+                        <td style={{ padding: '14px 12px' }}>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                       <button
                         onClick={() => handleEdit(item)}
@@ -550,12 +445,15 @@ const DynamicPricing = () => {
                         </svg>
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </div>
+          </div>
+        </div>
         <Modal show={showModal} onHide={() => {
           setShowModal(false);
           resetModalState();

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-// import passengerBookings from './data/passengerBookings.json'; // No longer needed, now using backend
 import './PassengerDashboard.css';
 import { Button, Form, InputGroup, Modal } from 'react-bootstrap';
 import logo from './assets/logo.png';
 import { AuthContext } from './AuthContext';
 import { useContext } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { useToast } from './hooks/useToast';
+import { FaEdit, FaTrash, FaUsers, FaShip, FaRoute } from 'react-icons/fa';
 
 function PassengerDashboard() {
   const { logout } = useContext(AuthContext);
+  const { showSuccess, showError, showConfirm } = useToast();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = (to) => { window.location.href = to; };
   const [data, setData] = useState([]);
@@ -30,6 +31,18 @@ function PassengerDashboard() {
 
   // Get unique ship names for dropdown
   const shipNames = Array.from(new Set(data.map(b => b.ship_name)));
+
+  // Filtered data
+  const filtered = data.filter(row => {
+    const matchesSearch = search === '' || row.passenger_name?.toLowerCase().includes(search.toLowerCase()) || row.email?.toLowerCase().includes(search.toLowerCase());
+    const matchesShip = shipFilter === 'All Ships' || row.ship_name === shipFilter;
+    return matchesSearch && matchesShip;
+  });
+
+  // Calculate summary statistics
+  const totalPassengers = filtered.length;
+  const uniqueShips = new Set(filtered.map(p => p.ship_name)).size;
+  const uniqueRoutes = new Set(filtered.map(p => p.route)).size;
 
   // CRUD State
   const [showEditModal, setShowEditModal] = useState(false);
@@ -91,22 +104,23 @@ function PassengerDashboard() {
   // Delete Passenger
   const handleDelete = (idx) => {
     const passenger = filtered[idx];
-    if (!window.confirm('Delete this passenger?')) return;
-    
-    fetch('http://localhost/Project-I/backend/deletePassenger.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ passenger_id: passenger.passenger_id })
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          refreshPassengers();
-        } else {
-          alert(result.message || 'Failed to delete passenger');
-        }
+    showConfirm('Delete this passenger?', () => {
+      fetch('http://localhost/Project-I/backend/deletePassenger.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passenger_id: passenger.passenger_id })
       })
-      .catch(() => alert('Network error'));
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            refreshPassengers();
+            showSuccess('Passenger deleted successfully!');
+          } else {
+            showError(result.message || 'Failed to delete passenger');
+          }
+        })
+        .catch(() => showError('Network error'));
+    });
   };
 
   // Refresh function
@@ -122,15 +136,6 @@ function PassengerDashboard() {
       })
       .catch(() => setData([]));
   };
-
-  // Filter by search and ship name (using backend field names)
-  const filtered = data.filter(row =>
-    (shipFilter === 'All Ships' || row.ship_name === shipFilter) &&
-    (
-      (row.passenger_name && row.passenger_name.toLowerCase().includes(search.toLowerCase())) ||
-      (row.email && row.email.toLowerCase().includes(search.toLowerCase()))
-    )
-  );
 
   const handleLogoutClick = () => setShowLogoutModal(true);
   const handleCloseLogoutModal = () => setShowLogoutModal(false);
@@ -206,6 +211,61 @@ function PassengerDashboard() {
             </p>
           </div>
         </section>
+        
+        {/* Summary Cards */}
+        <div className="container">
+          <div className="row g-3 mb-4">
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Passengers</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{totalPassengers}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaUsers style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Active bookings</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Active Ships</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{uniqueShips}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaShip style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Currently sailing</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Active Routes</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{uniqueRoutes}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaRoute style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Available destinations</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="container">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div></div>
@@ -241,54 +301,98 @@ function PassengerDashboard() {
               <Button variant="success" className="rounded-pill px-4" style={{ minWidth: 180 }} onClick={() => setShowAddModal(true)}>Add Passenger</Button>
             </div>
           </div>
-          <div className="table-responsive passenger-table-wrapper">
-            <table className="table table-striped table-bordered align-middle shadow-sm passenger-table">
-              <thead className="table-primary">
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Passenger Name</th>
-                  <th>Email</th>
-                  <th>Ship Name</th>
-                  <th>Route</th>
-                  <th>Cabin ID</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="text-center">No passengers found.</td></tr>
-                ) : (
-                  filtered.map((row, idx) => (
-                    <tr key={idx}>
-                      <td>{row.booking_id}</td>
-                      <td>{row.passenger_name}</td>
-                      <td>{row.email}</td>
-                      <td><span className="badge bg-primary bg-opacity-75 rounded-pill px-3 py-2">{row.ship_name}</span></td>
-                      <td><span className="badge bg-info bg-opacity-75 rounded-pill px-3 py-2">{row.route}</span></td>
-                      <td>{row.cabin_id}</td>
-                      <td>
-                        <div className="horizontal-action-buttons">
-                          <button
-                            className="action-rect-btn edit"
-                            title="Edit"
-                            onClick={() => handleEdit(row)}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="action-rect-btn delete"
-                            title="Delete"
-                            onClick={() => handleDelete(idx)}
-                          >
-                            <FaTrash />
-                          </button>
+          
+          {/* Modern Table */}
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <table className="table align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
+                  <tr>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Booking ID</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Passenger Name</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Email</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Ship Name</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Route</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Cabin ID</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center text-muted" style={{ padding: '40px' }}>
+                        <div style={{ fontSize: '1.1rem' }}>
+                          <FaUsers style={{ fontSize: '3rem', opacity: 0.3, marginBottom: '1rem' }} />
+                          <p className="mb-0">No passengers found</p>
+                          <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>Try adjusting your filters or add a new passenger</p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filtered.map((row, idx) => (
+                      <tr key={idx} style={{ background: idx % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                        <td style={{ padding: '14px 12px' }}>
+                          <span style={{ fontWeight: '600', color: '#667eea' }}>#{row.booking_id}</span>
+                        </td>
+                        <td style={{ padding: '14px 12px', fontWeight: '500' }}>{row.passenger_name}</td>
+                        <td style={{ padding: '14px 12px', color: '#666' }}>{row.email}</td>
+                        <td style={{ padding: '14px 12px' }}>
+                          <span style={{ background: '#e7f0ff', color: '#667eea', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            <FaShip style={{ marginRight: '6px', fontSize: '0.8rem' }} />
+                            {row.ship_name}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px' }}>
+                          <span style={{ background: '#e8f5e9', color: '#2e7d32', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            <FaRoute style={{ marginRight: '6px', fontSize: '0.8rem' }} />
+                            {row.route}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{row.cabin_id}</td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                              style={{
+                                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '8px 12px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
+                              }}
+                              title="Edit"
+                              onClick={() => handleEdit(row)}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              style={{
+                                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '8px 12px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
+                              }}
+                              title="Delete"
+                              onClick={() => handleDelete(idx)}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

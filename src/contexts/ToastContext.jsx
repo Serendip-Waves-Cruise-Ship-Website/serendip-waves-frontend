@@ -64,17 +64,17 @@ export const ToastProvider = ({ children }) => {
   const getToastIcon = (type) => {
     switch (type) {
       case 'success':
-        return <FaCheckCircle className="text-success me-2" />;
+        return <FaCheckCircle style={{ color: '#28a745', fontSize: '1.2rem' }} className="me-2" />;
       case 'error':
-        return <FaTimesCircle className="text-danger me-2" />;
+        return <FaTimesCircle style={{ color: '#dc3545', fontSize: '1.2rem' }} className="me-2" />;
       case 'warning':
-        return <FaExclamationTriangle className="text-warning me-2" />;
+        return <FaExclamationTriangle style={{ color: '#fd7e14', fontSize: '1.2rem' }} className="me-2" />;
       case 'info':
-        return <FaInfoCircle className="text-info me-2" />;
+        return <FaInfoCircle style={{ color: '#17a2b8', fontSize: '1.2rem' }} className="me-2" />;
       case 'confirm':
-        return <FaExclamationTriangle className="text-warning me-2" />;
+        return <FaExclamationTriangle style={{ color: '#fd7e14', fontSize: '1.2rem' }} className="me-2" />;
       default:
-        return <FaInfoCircle className="text-info me-2" />;
+        return <FaInfoCircle style={{ color: '#17a2b8', fontSize: '1.2rem' }} className="me-2" />;
     }
   };
 
@@ -85,11 +85,11 @@ export const ToastProvider = ({ children }) => {
       case 'error':
         return 'danger';
       case 'warning':
-        return 'warning';
+        return 'light';
       case 'info':
         return 'info';
       case 'confirm':
-        return 'warning';
+        return 'light';
       default:
         return 'light';
     }
@@ -136,19 +136,25 @@ export const ToastProvider = ({ children }) => {
           >
             <Toast.Header 
               closeButton={toast.type !== 'confirm'}
-              className={`text-${toast.type === 'success' ? 'success' : 
-                              toast.type === 'error' ? 'danger' : 
-                              toast.type === 'warning' ? 'warning' : 'info'}`}
+              style={{
+                backgroundColor: 'white',
+                borderBottom: '1px solid #e9ecef'
+              }}
             >
               {getToastIcon(toast.type)}
-              <strong className="me-auto">
+              <strong className="me-auto" style={{ 
+                color: toast.type === 'success' ? '#28a745' :
+                       toast.type === 'error' ? '#dc3545' :
+                       toast.type === 'warning' ? '#fd7e14' : 
+                       '#17a2b8'
+              }}>
                 {toast.type === 'success' ? 'Success' :
                  toast.type === 'error' ? 'Error' :
                  toast.type === 'warning' ? 'Warning' :
                  toast.type === 'confirm' ? 'Confirm Action' : 'Information'}
               </strong>
             </Toast.Header>
-            <Toast.Body className={`text-${toast.type === 'confirm' ? 'dark' : 'white'}`}>
+            <Toast.Body className={`text-dark`}>
               <div className="mb-2">{toast.message}</div>
               
               {toast.type === 'confirm' && (

@@ -19,6 +19,7 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
   const [step, setStep] = useState("login"); // 'login', 'forgot', 'otp', 'newPassword'
   const [generatedOtp, setGeneratedOtp] = useState("");
   const [formKey, setFormKey] = useState(Date.now()); // Force re-render on logout
+  const [staySignedIn, setStaySignedIn] = useState(false);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const navigate = useNavigate();
@@ -181,7 +182,23 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
         toast.success(response.data.message, { autoClose: 2000 });
 
         // Save user info for dashboard
-        localStorage.setItem("currentUser", JSON.stringify(user));
+        if (staySignedIn) {
+          // Use localStorage for persistent login (30 days)
+          const userData = {
+            ...user,
+            loginTimestamp: Date.now(),
+            staySignedIn: true
+          };
+          localStorage.setItem("currentUser", JSON.stringify(userData));
+        } else {
+          // Use sessionStorage for session-only login
+          const userData = {
+            ...user,
+            staySignedIn: false
+          };
+          sessionStorage.setItem("currentUser", JSON.stringify(userData));
+        }
+        
         // Normalize role to lowercase for consistency
         const normalizedUser = { ...user, role: user.role ? user.role.toLowerCase() : undefined };
         setCurrentUser(normalizedUser);
@@ -290,12 +307,12 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
       <>
         <div className="text-center mb-4">
           <img src="/logo.png" alt="Serendip Waves Logo" width="80" height="80" className="mb-3" />
-          <h2 className="fw-bold mb-0 text-white">Login to Serendip Waves</h2>
+          <h2 className="fw-bold mb-0 text-dark">Login to Serendip Waves</h2>
         </div>
         {error && <div className="alert alert-danger text-center">{error}</div>}
         <form onSubmit={handleLogin} autoComplete="off">
           <div className="mb-3">
-            <label htmlFor="login-email" className="form-label fw-semibold text-white">Email Address</label>
+            <label htmlFor="login-email" className="form-label fw-semibold text-dark">Email Address</label>
             <input
               type="email"
               className="form-control form-control-lg"
@@ -316,7 +333,7 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="login-password" className="form-label fw-semibold text-white">Password</label>
+            <label htmlFor="login-password" className="form-label fw-semibold text-dark">Password</label>
             <input
               type="password"
               className="form-control form-control-lg"
@@ -335,20 +352,29 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
               autoCorrect="off"
               spellCheck="false"
             />
-            <div className="form-text" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              Your password must be at least 6 characters long.
-            </div>
           </div>
-          <div className="mb-3 text-end">
+          <div className="mb-3 d-flex justify-content-between align-items-center">
+            <div className="form-check">
+              <input 
+                className="form-check-input" 
+                type="checkbox" 
+                id="staySignedIn"
+                checked={staySignedIn}
+                onChange={(e) => setStaySignedIn(e.target.checked)}
+              />
+              <label className="form-check-label text-dark" htmlFor="staySignedIn" style={{ fontSize: '0.9rem', cursor: 'pointer' }}>
+                Stay signed in
+              </label>
+            </div>
             <span
               className="fw-semibold"
-              style={{ color: '#ffd600', cursor: 'pointer', fontSize: '0.9rem' }}
+              style={{ color: '#2563eb', cursor: 'pointer', fontSize: '0.9rem' }}
               onClick={() => { setStep("forgot"); setError(""); setSuccess(""); }}
             >
               Forgot Password?
             </span>
           </div>
-          <div className="d-grid mb-4">
+          <div className="d-grid mb-3">
             <button 
               type="submit" 
               className="btn btn-warning btn-lg fw-bold" 
@@ -361,24 +387,21 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
                   Logging in...
                 </>
               ) : (
-                'Login'
+                'Sign In'
               )}
             </button>
           </div>
           <div className="text-center">
-            <span style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Don't have an account?{' '}
-              <span
-                className="fw-semibold"
-                style={{ color: '#ffd600', cursor: 'pointer' }}
-                onClick={() => {
-                  resetAll();
-                  onClose();
-                  if (onSignupClick) onSignupClick();
-                }}
-              >
-                Sign up
-              </span>
+            <span
+              className="fw-semibold"
+              style={{ color: '#2563eb', cursor: 'pointer', textDecoration: 'underline' }}
+              onClick={() => {
+                resetAll();
+                onClose();
+                if (onSignupClick) onSignupClick();
+              }}
+            >
+              Create an account
             </span>
           </div>
         </form>
@@ -389,13 +412,13 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
       <>
         <div className="text-center mb-4">
           <img src="/logo.png" alt="Serendip Waves Logo" width="80" height="80" className="mb-3" />
-          <h2 className="fw-bold mb-0 text-white">Reset Password</h2>
+          <h2 className="fw-bold mb-0 text-dark">Reset Password</h2>
         </div>
         {error && <div className="alert alert-danger text-center">{error}</div>}
         {success && <div className="alert alert-success text-center">{success}</div>}
         <form onSubmit={handleForgotPassword} autoComplete="off">
-          <div className="mb-4">
-            <label htmlFor="forgot-email" className="form-label fw-semibold text-white">Email Address</label>
+          <div className="mb-3">
+            <label htmlFor="forgot-email" className="form-label fw-semibold text-dark">Email Address</label>
             <input 
               type="email" 
               className="form-control form-control-lg" 
@@ -428,11 +451,11 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
             </button>
           </div>
           <div className="text-center">
-            <span style={{ color: 'rgba(255,255,255,0.8)' }}>
+            <span style={{ color: '#6b7280' }}>
               Remember your password?{' '}
               <span
                 className="fw-semibold"
-                style={{ color: '#ffd600', cursor: 'pointer' }}
+                style={{ color: '#2563eb', cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => { setStep("login"); setError(""); setSuccess(""); }}
               >
                 Back to Login
@@ -447,12 +470,12 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
       <>
         <div className="text-center mb-4">
           <img src="/logo.png" alt="Serendip Waves Logo" width="80" height="80" className="mb-3" />
-          <h2 className="fw-bold mb-0 text-white">Enter OTP</h2>
+          <h2 className="fw-bold mb-0 text-dark">Enter OTP</h2>
         </div>
         {error && <div className="alert alert-danger text-center">{error}</div>}
         <form onSubmit={handleOtpSubmit} autoComplete="off">
-          <div className="mb-4">
-            <label htmlFor="otp-input" className="form-label fw-semibold text-white">OTP</label>
+          <div className="mb-3">
+            <label htmlFor="otp-input" className="form-label fw-semibold text-dark">OTP</label>
             <input
               type="text"
               className="form-control form-control-lg"
@@ -484,11 +507,11 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
       <>
         <div className="text-center mb-4">
           <img src="/logo.png" alt="Serendip Waves Logo" width="80" height="80" className="mb-3" />
-          <h2 className="fw-bold mb-0 text-white">Set New Password</h2>
+          <h2 className="fw-bold mb-0 text-dark">Set New Password</h2>
         </div>
         <form onSubmit={handleNewPasswordSubmit} autoComplete="off">
           <div className="mb-3">
-            <label htmlFor="new-password" className="form-label fw-semibold text-white">New Password</label>
+            <label htmlFor="new-password" className="form-label fw-semibold text-dark">New Password</label>
             <input
               type="password"
               className="form-control form-control-lg"
@@ -503,8 +526,8 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
               spellCheck="false"
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="confirm-password" className="form-label fw-semibold text-white">Confirm Password</label>
+          <div className="mb-3">
+            <label htmlFor="confirm-password" className="form-label fw-semibold text-dark">Confirm Password</label>
             <input
               type="password"
               className="form-control form-control-lg"
@@ -552,15 +575,25 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
         </div>
       </div>
       <style>{`
-        .form-control:focus {
-          background: rgba(255,255,255,0.2) !important;
-          border-color: #ffd600 !important;
-          box-shadow: 0 0 0 0.2rem rgba(255, 214, 0, 0.25) !important;
-          color: #fff !important;
-          -webkit-backdrop-filter: blur(15px) !important;
-          backdrop-filter: blur(15px) !important;
+        .form-control {
+          background: #ffffff !important;
+          color: #1a202c !important;
         }
-        .form-control::placeholder { color: rgba(255,255,255,0.6) !important; }
+        .form-control:-webkit-autofill,
+        .form-control:-webkit-autofill:hover,
+        .form-control:-webkit-autofill:focus,
+        .form-control:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 30px white inset !important;
+          -webkit-text-fill-color: #1a202c !important;
+          box-shadow: 0 0 0 30px white inset !important;
+        }
+        .form-control:focus {
+          background: #ffffff !important;
+          border-color: #2563eb !important;
+          box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
+          color: #1a202c !important;
+        }
+        .form-control::placeholder { color: #9ca3af !important; }
         .btn-warning:hover:not(:disabled) {
           background: rgba(255, 193, 7, 1) !important;
           border-color: rgba(255, 193, 7, 1) !important;
@@ -572,8 +605,8 @@ const LoginModal = ({ isOpen, onClose, onSignupClick }) => {
           transition: background 0.2s;
         }
         .login-modal-close-btn:hover {
-          background: rgba(255,255,255,0.2) !important;
-          color: #ffd600 !important;
+          background: rgba(0,0,0,0.1) !important;
+          color: #1a202c !important;
         }
         .card {
           transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -617,20 +650,18 @@ const overlayStyle = {
 
 const cardStyle = {
   borderRadius: 24,
-  background: "rgba(255, 255, 255, 0.13)",
-  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-  backdropFilter: "blur(20px)",
-  border: "1.5px solid rgba(255,255,255,0.18)",
-  color: "#fff",
-  maxWidth: '420px',
-  minWidth: '340px',
-  width: '100%',
+  background: "#ffffff",
+  boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.15)",
+  border: "1px solid rgba(0,0,0,0.1)",
+  color: "#1a202c",
+  maxWidth: '900px',
+  minWidth: '700px',
+  width: '90%',
   position: 'relative',
-  padding: '24px 20px',
+  padding: '40px 50px',
   boxSizing: 'border-box',
-  margin: 'auto',
+  margin: '0 auto',
   display: 'block',
-  marginTop: '64px', // add space from navbar
 };
 
 const closeBtnStyle = {
@@ -640,17 +671,16 @@ const closeBtnStyle = {
   background: "none",
   border: "none",
   fontSize: 32,
-  color: "#fff",
+  color: "#1a202c",
   cursor: "pointer",
   zIndex: 2
 };
 
 const inputStyle = {
   borderRadius: '10px',
-  border: '1px solid rgba(255,255,255,0.3)',
-  background: 'rgba(255,255,255,0.1)',
-  color: '#fff',
-  backdropFilter: 'blur(10px)'
+  border: '1px solid #d1d5db',
+  background: '#ffffff',
+  color: '#1a202c'
 };
 
 const buttonStyle = {

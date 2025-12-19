@@ -11,30 +11,54 @@ const AuthProvider = ({ children }) => {
 
   // On mount, check session with backend
   useEffect(() => {
-    // First check localStorage for updated user data
-    const localUser = localStorage.getItem('currentUser');
+    // First check localStorage for persistent login (Stay signed in)
+    let localUser = localStorage.getItem('currentUser');
+    let isFromSession = false;
+    
+    // If not in localStorage, check sessionStorage for session-only login
+    if (!localUser) {
+      localUser = sessionStorage.getItem('currentUser');
+      isFromSession = true;
+    }
+    
     if (localUser) {
       try {
         const userData = JSON.parse(localUser);
-        console.log('Found user data in localStorage:', userData);
         
         // Validate that we have essential user data
         if (userData && userData.id && userData.email) {
+          // Check if login is expired (for localStorage only, after 30 days)
+          if (!isFromSession && userData.loginTimestamp) {
+            const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+            const isExpired = Date.now() - userData.loginTimestamp > thirtyDaysInMs;
+            
+            if (isExpired) {
+              console.log('Login session expired, clearing localStorage...');
+              localStorage.removeItem('currentUser');
+              setCurrentUser(null);
+              setIsAuthenticated(false);
+              setLoading(false);
+              return;
+            }
+          }
+          
           setCurrentUser(userData);
           setIsAuthenticated(true);
           setLoading(false);
-          return; // Skip session check if we have valid localStorage data
+          return; // Skip session check if we have valid stored data
         } else {
-          console.log('Invalid user data in localStorage, removing...');
+          console.log('Invalid user data in storage, removing...');
           localStorage.removeItem('currentUser');
+          sessionStorage.removeItem('currentUser');
         }
       } catch (error) {
-        console.log('Invalid localStorage data, checking session...');
+        console.log('Invalid storage data, checking session...');
         localStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
       }
     }
 
-    // Fallback to session check if no localStorage data
+    // Fallback to session check if no stored data
     fetch('http://localhost/Project-I/backend/login.php?action=session_user', {
       method: 'GET',
       credentials: 'include',
@@ -45,8 +69,8 @@ const AuthProvider = ({ children }) => {
         if (data.success && data.user) {
           setCurrentUser(data.user);
           setIsAuthenticated(true);
-          // Update localStorage with session data
-          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          // Update sessionStorage with session data (don't use localStorage for session-only)
+          sessionStorage.setItem('currentUser', JSON.stringify(data.user));
         } else {
           setCurrentUser(null);
           setIsAuthenticated(false);

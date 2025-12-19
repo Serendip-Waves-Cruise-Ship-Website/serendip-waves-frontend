@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 
 const API_BASE = 'http://localhost/Project-I/backend';
 
 const DestinationDetails = () => {
   const { country } = useParams();
-  const { isAuthenticated, currentUser, setIsBookingModalOpen, setDefaultBookingCountry } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { isAuthenticated, currentUser, setDefaultBookingCountry } = useContext(AuthContext);
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -114,16 +115,37 @@ const DestinationDetails = () => {
             )}
             {/* Book Now button - only for logged in users */}
             {isAuthenticated && currentUser?.role?.toLowerCase() === 'customer' && (
-              <button
-                style={{ background: '#ffe066', color: '#222', fontWeight: 700, fontSize: '1.25rem', border: 'none', borderRadius: 30, padding: '12px 38px', marginTop: 10, boxShadow: '0 2px 8px #0001', letterSpacing: 1, cursor: 'pointer', transition: 'background 0.2s' }}
-                onClick={() => {
-                  console.log('Book Now clicked', { setIsBookingModalOpen, setDefaultBookingCountry, detail });
-                  if (setDefaultBookingCountry) setDefaultBookingCountry(detail.destination);
-                  setIsBookingModalOpen(true);
-                }}
-              >
-                BOOK NOW
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', width: '100%' }}>
+                <button
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '14px 32px',
+                    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    transform: 'scale(1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                  }}
+                  onClick={() => {
+                    if (setDefaultBookingCountry) setDefaultBookingCountry(detail.destination);
+                    navigate('/booking/summary');
+                  }}
+                >
+                  Book This Cruise
+                </button>
+              </div>
             )}
           </div>
           {/* Right column: 2x2 image grid and description */}

@@ -168,22 +168,22 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
         <div className="card border-0 shadow-lg position-relative" style={cardStyle}>
           <button style={closeBtnStyle} onClick={onClose}>&times;</button>
           <div className="card-body p-2">
-            <div className="text-center mb-3">
-              <img src="/logo.png" alt="Serendip Waves Logo" width="80" height="80" className="mb-2" />
-              <h2 className="fw-bold mb-0 text-white">Sign Up for Serendip Waves</h2>
-              <p className="text-white-50 mb-0">Create your account and start your cruise adventure</p>
+            <div className="text-center mb-2">
+              <img src="/logo.png" alt="Serendip Waves Logo" width="60" height="60" className="mb-1" />
+              <h3 className="fw-bold mb-0 text-dark">Sign Up for Serendip Waves</h3>
+              <p className="text-muted mb-0" style={{fontSize: '14px'}}>Create your account and start your cruise adventure</p>
             </div>
             {error && <div className="alert alert-danger text-center py-2">{error}</div>}
             {success && <div className="alert alert-success text-center py-2">{success}</div>}
             <form onSubmit={handleSubmit}>
               <div className="row">
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Full Name *</label>
-                  <input type="text" className="form-control form-control-lg" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" style={inputStyle} />
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Full Name *</label>
+                  <input type="text" className="form-control" name="fullName" value={form.fullName} onChange={handleChange} placeholder="Enter your full name" style={inputStyle} />
                   {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Phone Number *</label>
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Phone Number *</label>
                   <div className="input-group">
                     <select 
                       className="form-select" 
@@ -264,7 +264,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                     </select>
                     <input 
                       type="tel" 
-                      className="form-control form-control-lg" 
+                      className="form-control" 
                       name="phone" 
                       value={form.phone} 
                       onChange={handleChange} 
@@ -276,13 +276,13 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                   {errors.country && <div className="text-danger small mt-1">{errors.country}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Date of Birth *</label>
-                  <input type="date" className="form-control form-control-lg" name="dob" value={form.dob} onChange={handleChange} style={inputStyle} />
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Date of Birth *</label>
+                  <input type="date" className="form-control" name="dob" value={form.dob} onChange={handleChange} style={inputStyle} />
                   {errors.dob && <div className="text-danger small mt-1">{errors.dob}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Gender *</label>
-                  <select className="form-select form-select-lg" name="gender" value={form.gender} onChange={handleChange} style={{...inputStyle, minWidth: '100%', width: '100%'}} required>
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Gender *</label>
+                  <select className="form-select" name="gender" value={form.gender} onChange={handleChange} style={{...inputStyle, minWidth: '100%', width: '100%'}} required>
                     <option value="" disabled>Select gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -291,20 +291,20 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                   {errors.gender && <div className="text-danger small mt-1">{errors.gender}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Email Address *</label>
-                  <input type="email" className="form-control form-control-lg" name="email" value={form.email} onChange={handleChange} placeholder="Enter your email" style={inputStyle} />
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Email Address *</label>
+                  <input type="email" className="form-control" name="email" value={form.email} onChange={handleChange} placeholder="Enter your email" style={inputStyle} />
                   {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Passport Number (optional)</label>
-                  <input type="text" className="form-control form-control-lg" name="passport" value={form.passport} onChange={handleChange} placeholder="Enter your passport number" style={inputStyle} />
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Passport Number (optional)</label>
+                  <input type="text" className="form-control" name="passport" value={form.passport} onChange={handleChange} placeholder="Enter your passport number" style={inputStyle} />
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Password *</label>
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Password *</label>
                   <div className="position-relative">
                     <input 
                       type={showPassword ? "text" : "password"} 
-                      className="form-control form-control-lg" 
+                      className="form-control" 
                       name="password" 
                       value={form.password} 
                       onChange={handleChange} 
@@ -329,18 +329,18 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                     </span>
                   </div>
                   {passwordFocused && (
-                    <div className="text-white small mt-1" style={{opacity:0.85}}>
+                    <div className="text-muted small mt-1" style={{opacity:0.85}}>
                       Password must be at least 6 characters long, include uppercase and lowercase letters, at least one number, and one special character.
                     </div>
                   )}
                   {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
                 </div>
                 <div className="col-md-6 mb-2">
-                  <label className="form-label fw-semibold text-white mb-1">Confirm Password *</label>
+                  <label className="form-label fw-semibold text-dark mb-1" style={{fontSize: '14px'}}>Confirm Password *</label>
                   <div className="position-relative">
                     <input 
                       type={showConfirmPassword ? "text" : "password"} 
-                      className="form-control form-control-lg" 
+                      className="form-control" 
                       name="confirmPassword" 
                       value={form.confirmPassword} 
                       onChange={handleChange} 
@@ -365,10 +365,10 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                   {errors.confirmPassword && <div className="text-danger small mt-1">{errors.confirmPassword}</div>}
                 </div>
               </div>
-              <div className="d-grid mb-3">
+              <div className="d-grid mb-2">
                 <button 
                   type="submit" 
-                  className="btn btn-warning btn-lg fw-bold" 
+                  className="btn btn-warning fw-bold" 
                   style={buttonStyle}
                   disabled={isLoading}
                 >
@@ -383,35 +383,58 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
                 </button>
               </div>
               <div className="text-center">
-                <span style={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Already have an account?{' '}
-                  <span
-                    className="fw-semibold"
-                    style={{ color: '#ffd600', cursor: 'pointer' }}
-                    onClick={() => {
-                      onClose();
-                      if (openLoginModal) openLoginModal();
-                    }}
-                  >
-                    Sign in here
-                  </span>
+                <span
+                  className="fw-semibold"
+                  style={{ color: '#2563eb', cursor: 'pointer', textDecoration: 'underline' }}
+                  onClick={() => {
+                    onClose();
+                    if (openLoginModal) openLoginModal();
+                  }}
+                >
+                  Sign in here
                 </span>
               </div>
             </form>
           </div>
         </div>
         <style>{`
-          .form-control:focus, .form-select:focus {
-            background: rgba(255,255,255,0.2) !important;
-            border-color: #ffd600 !important;
-            box-shadow: 0 0 0 0.2rem rgba(255, 214, 0, 0.25) !important;
-            color: #fff !important;
-            backdrop-filter: blur(15px) !important;
+          .form-control, .form-select {
+            background: #ffffff !important;
+            color: #1a202c !important;
           }
-          .form-control::placeholder { color: rgba(255,255,255,0.6) !important; }
+          .form-control:-webkit-autofill,
+          .form-control:-webkit-autofill:hover,
+          .form-control:-webkit-autofill:focus,
+          .form-control:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px white inset !important;
+            -webkit-text-fill-color: #1a202c !important;
+            box-shadow: 0 0 0 30px white inset !important;
+          }
+          .form-control:focus, .form-select:focus {
+            background: #ffffff !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
+            color: #1a202c !important;
+          }
+          .form-control::placeholder { color: #9ca3af !important; }
+          .form-select {
+            color: #1a202c !important;
+            background-color: #ffffff !important;
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            appearance: menulist;
+          }
+          .form-select:not([size]):not([multiple]) {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231a202c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+          }
           .form-select option {
-            color: #000 !important;
-            background: #fff !important;
+            color: #1a202c !important;
+            background-color: #ffffff !important;
+          }
+          .form-select option:checked,
+          .form-select option:hover {
+            background-color: #e5e7eb !important;
+            color: #1a202c !important;
           }
           .btn-warning:hover:not(:disabled) {
             background: rgba(255, 193, 7, 1) !important;
@@ -462,8 +485,8 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
             <button style={closeBtnStyle} onClick={() => setOtpModalVisible(false)}>&times;</button>
             <div className="card-body p-4">
               <div className="text-center mb-3">
-                <h3 className="fw-bold mb-0 text-white">Verify OTP</h3>
-                <p className="text-white-50 mb-3">Enter the OTP sent to your email</p>
+                <h3 className="fw-bold mb-0 text-dark">Verify OTP</h3>
+                <p className="text-muted mb-3">Enter the OTP sent to your email</p>
               </div>
               <div className="mb-3">
                 <input 
@@ -536,20 +559,20 @@ const overlayStyle = {
 
 const cardStyle = {
   borderRadius: 24,
-  background: "rgba(255, 255, 255, 0.13)",
-  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-  backdropFilter: "blur(20px)",
-  border: "1.5px solid rgba(255,255,255,0.18)",
-  color: "#fff",
-  maxWidth: '800px',
-  minWidth: '500px',
-  width: '100%',
+  background: "#ffffff",
+  boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.15)",
+  border: "1px solid rgba(0,0,0,0.1)",
+  color: "#1a202c",
+  maxWidth: '1000px',
+  minWidth: '850px',
+  width: '95%',
+  maxHeight: '90vh',
+  overflowY: 'auto',
   position: 'relative',
-  padding: '12px 16px',
+  padding: '30px 40px',
   boxSizing: 'border-box',
-  margin: 'auto',
+  margin: '0 auto',
   display: 'block',
-  marginTop: '64px', // add space from navbar
 };
 
 const closeBtnStyle = {
@@ -559,17 +582,19 @@ const closeBtnStyle = {
   background: "none",
   border: "none",
   fontSize: 32,
-  color: "#fff",
+  color: "#1a202c",
   cursor: "pointer",
   zIndex: 2
 };
 
 const inputStyle = {
   borderRadius: '10px',
-  border: '1px solid rgba(255,255,255,0.3)',
-  background: 'rgba(255,255,255,0.1)',
-  color: '#fff',
-  backdropFilter: 'blur(10px)'
+  border: '1px solid #d1d5db',
+  background: '#ffffff',
+  color: '#1a202c',
+  WebkitAppearance: 'none',
+  MozAppearance: 'none',
+  appearance: 'none'
 };
 
 const buttonStyle = {

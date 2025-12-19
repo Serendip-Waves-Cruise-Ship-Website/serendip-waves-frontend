@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { FaArrowLeft, FaLeaf, FaSeedling, FaMosque, FaHeartbeat, FaBreadSlice, FaUtensils, FaCoffee, FaWineGlass } from 'react-icons/fa';
 import axios from 'axios';
 import './OurDining.css';
-
-// Import meal type images - add these images to assets folder
-import basicVegetarianImg from './assets/basic-vegetarian-meal.jpg';
-import veganImg from './assets/vegan-meal.jpg';
-import halalGourmetImg from './assets/halal-gourmet-meal.jpg';
-import diabeticFriendlyImg from './assets/diabetic-friendly-meal.jpg';
-import glutenFreeImg from './assets/gluten-free-meal.jpg';
 
 
 const OurDining = () => {
@@ -19,60 +12,6 @@ const OurDining = () => {
   // State for meal types from backend
   const [mealTypes, setMealTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Static fallback data (keeping original design intact)
-  const fallbackMealTypes = useMemo(() => [
-    {
-      id: 'basic',
-      name: 'Basic/Vegetarian',
-      icon: <FaLeaf />,
-      image: basicVegetarianImg,
-      description: 'Fresh, wholesome vegetarian meals prepared with the finest ingredients. Our basic menu features nutritious, plant-based dishes that satisfy and nourish your body during your cruise journey.',
-      features: ['Fresh seasonal vegetables', 'Wholesome grains and legumes', 'Dairy products included', 'Balanced nutrition'],
-      badge: 'Most Popular',
-      badgeColor: 'success'
-    },
-    {
-      id: 'vegan',
-      name: 'Vegan',
-      icon: <FaSeedling />,
-      image: veganImg,
-      description: 'Completely plant-based cuisine that never compromises on taste or nutrition. Our vegan menu showcases creative, flavorful dishes using only the finest plant-based ingredients.',
-      features: ['100% plant-based ingredients', 'Rich in vitamins and minerals', 'Environmentally conscious', 'Creative flavor combinations'],
-      badge: 'Premium',
-      badgeColor: 'warning'
-    },
-    {
-      id: 'halal',
-      name: 'Halal Gourmet',
-      icon: <FaMosque />,
-      image: halalGourmetImg,
-      description: 'Gourmet halal cuisine prepared according to Islamic dietary laws, featuring exquisite flavors from around the world. Our halal menu combines tradition with modern culinary techniques.',
-      features: ['Certified halal ingredients', 'International cuisine styles', 'Expert halal preparation', 'Rich cultural flavors'],
-      badge: 'Certified',
-      badgeColor: 'info'
-    },
-    {
-      id: 'diabetic',
-      name: 'Diabetic-Friendly',
-      icon: <FaHeartbeat />,
-      image: diabeticFriendlyImg,
-      description: 'Specially crafted meals designed for diabetic dietary needs, focusing on balanced nutrition with controlled carbohydrates and natural ingredients for optimal health.',
-      features: ['Low glycemic index foods', 'Controlled portion sizes', 'Natural sweeteners', 'Heart-healthy options'],
-      badge: 'Health Focused',
-      badgeColor: 'danger'
-    },
-    {
-      id: 'gluten_free',
-      name: 'Gluten-Free',
-      icon: <FaBreadSlice />,
-      image: glutenFreeImg,
-      description: 'Delicious gluten-free options that ensure everyone can enjoy exceptional dining. Our gluten-free menu maintains full flavor while accommodating celiac and gluten-sensitive passengers.',
-      features: ['Certified gluten-free ingredients', 'Separate preparation areas', 'Cross-contamination prevention', 'Full flavor profiles'],
-      badge: 'Celiac Safe',
-      badgeColor: 'primary'
-    }
-  ], []);
 
   // Icon mapping function
   const getIconForMealType = (type) => {
@@ -207,19 +146,17 @@ const OurDining = () => {
             status: option.status
           }));
 
-        setMealTypes(transformedData.length > 0 ? transformedData : fallbackMealTypes);
+        setMealTypes(transformedData);
       } else {
-        // Use fallback data if backend fails
-        setMealTypes(fallbackMealTypes);
+        setMealTypes([]);
       }
     } catch (error) {
       console.error('Error fetching meal options:', error);
-      // Use fallback data if backend fails
-      setMealTypes(fallbackMealTypes);
+      setMealTypes([]);
     } finally {
       setLoading(false);
     }
-  }, [fallbackMealTypes]);
+  }, []);
 
   // Fetch meal options from backend
   useEffect(() => {

@@ -373,82 +373,97 @@ function CabinAdminDashboard() {
             </div>
           </div>
         </div>
-        <div className="cabin-card">
+        <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
           <div className="table-responsive">
-            <table className="table align-middle mb-0">
-              <thead>
+            <table className="table align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+              <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
                 <tr>
-                  <th>
-                    <FaHashtag className="me-2 text-primary" />
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaHashtag className="me-2" />
                     Cabin ID
                   </th>
-                  <th>
-                    <FaUser className="me-2 text-primary" />
-                    Passenger Name
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaUser className="me-2" />
+                    Passenger
                   </th>
-                  <th>
-                    <FaShip className="me-2 text-primary" />
-                    Cruise Name
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaShip className="me-2" />
+                    Cruise
                   </th>
-                  <th>
-                    <FaBed className="me-2 text-primary" />
-                    Cabin Type
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaBed className="me-2" />
+                    Type
                   </th>
-                  <th>
-                    <FaDoorOpen className="me-2 text-primary" />
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaDoorOpen className="me-2" />
                     Cabin No
                   </th>
-                  <th>
-                    <FaUsers className="me-2 text-primary" />
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaUsers className="me-2" />
                     Guests
                   </th>
-                  <th>
-                    <FaCalendarAlt className="me-2 text-primary" />
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaCalendarAlt className="me-2" />
                     Booking Date
                   </th>
-                  <th>
-                    <FaDollarSign className="me-2 text-primary" />
-                    Total Price
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>
+                    <FaDollarSign className="me-2" />
+                    Price
                   </th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCabins.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center text-muted">
-                      No cabins found.
+                    <td colSpan={10} className="text-center text-muted" style={{ padding: '40px' }}>
+                      <div style={{ fontSize: '1.1rem' }}>No cabins found</div>
                     </td>
                   </tr>
                 ) : (
                   filteredCabins.map((cabin, idx) => (
-                    <tr key={cabin.id}>
-                      <td>{cabin.id}</td>
-                      <td>{cabin.passenger}</td>
-                      <td>{cabin.cruise}</td>
-                      <td>
-                        <span className="badge bg-primary bg-opacity-75 rounded-pill">
+                    <tr key={cabin.id} style={{ background: idx % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                      <td style={{ padding: '14px 12px' }}>
+                        <span style={{ fontWeight: '600', color: '#667eea' }}>#{cabin.id}</span>
+                      </td>
+                      <td style={{ padding: '14px 12px', fontWeight: '500' }}>{cabin.passenger}</td>
+                      <td style={{ padding: '14px 12px' }}>{cabin.cruise}</td>
+                      <td style={{ padding: '14px 12px' }}>
+                        <span style={{ 
+                          background: cabin.type === 'Suite' ? '#d4f4dd' : cabin.type === 'Balcony' ? '#fff4e6' : cabin.type === 'Ocean View' ? '#e3f2fd' : '#f5f5f5',
+                          color: cabin.type === 'Suite' ? '#1e7e34' : cabin.type === 'Balcony' ? '#e65100' : cabin.type === 'Ocean View' ? '#0277bd' : '#555',
+                          padding: '6px 14px',
+                          borderRadius: '12px',
+                          fontSize: '0.85rem',
+                          fontWeight: '500'
+                        }}>
                           {cabin.type}
                         </span>
                       </td>
-                      <td>{cabin.number}</td>
-                      <td>{cabin.guests}</td>
-                      <td>{cabin.date}</td>
-                      <td>${cabin.price.toLocaleString()}</td>
-                      <td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                        <span style={{ background: '#e7f0ff', color: '#667eea', padding: '4px 12px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                          {cabin.number}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center', fontWeight: '500' }}>{cabin.guests}</td>
+                      <td style={{ padding: '14px 12px', color: '#666' }}>{cabin.date}</td>
+                      <td style={{ padding: '14px 12px', textAlign: 'right', fontWeight: '600', color: '#1e7e34', fontSize: '1rem' }}>
+                        ${cabin.price.toLocaleString()}
+                      </td>
+                      <td style={{ padding: '14px 12px', textAlign: 'center' }}>
                         {(() => {
                           // Get current date (without time for accurate date comparison)
                           const today = new Date();
                           today.setHours(0, 0, 0, 0);
                           
                           let statusLabel = cabin.status || "Available";
-                          let badgeClass = "bg-secondary";
+                          let statusStyle = { background: '#e0e0e0', color: '#666' };
                           
                           // If admin has manually set status to Maintenance, always show that
                           if (cabin.status === "Maintenance") {
                             return (
-                              <span className="badge rounded-pill bg-warning text-dark">
+                              <span style={{ background: '#fff4e6', color: '#e65100', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
                                 Maintenance
                               </span>
                             );
@@ -463,51 +478,55 @@ function CabinAdminDashboard() {
                             
                             if (today < start) {
                               statusLabel = "Booked";
-                              badgeClass = "bg-primary";
+                              statusStyle = { background: '#e7f0ff', color: '#667eea' };
                             } else if (today >= start && today <= end) {
                               statusLabel = "Occupied";
-                              badgeClass = "bg-success";
+                              statusStyle = { background: '#d4f4dd', color: '#1e7e34' };
                             } else if (today > end) {
                               statusLabel = "Available";
-                              badgeClass = "bg-info";
+                              statusStyle = { background: '#e3f2fd', color: '#0277bd' };
                             }
                           } else {
                             // Fallback to manual status if no trip dates
                             switch (cabin.status) {
                               case "Booked":
-                                badgeClass = "bg-primary";
+                                statusStyle = { background: '#e7f0ff', color: '#667eea' };
                                 break;
                               case "Occupied":
-                                badgeClass = "bg-success";
+                                statusStyle = { background: '#d4f4dd', color: '#1e7e34' };
                                 break;
                               case "Available":
-                                badgeClass = "bg-info";
+                                statusStyle = { background: '#e3f2fd', color: '#0277bd' };
                                 break;
                               default:
-                                badgeClass = "bg-secondary";
+                                statusStyle = { background: '#e0e0e0', color: '#666' };
                             }
                           }
                           
                           return (
-                            <span className={`badge rounded-pill ${badgeClass}`}>
+                            <span style={{ ...statusStyle, padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
                               {statusLabel}
                             </span>
                           );
                         })()}
                       </td>
-                      <td>
-                        <div className="horizontal-action-buttons">
+                      <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                           <button
-                            className="action-rect-btn edit"
+                            style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer', transition: 'transform 0.2s' }}
                             title="Edit"
                             onClick={() => handleEdit(idx)}
+                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                           >
                             <FaEdit />
                           </button>
                           <button
-                            className="action-rect-btn delete"
+                            style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', border: 'none', borderRadius: '8px', padding: '8px 12px', color: 'white', cursor: 'pointer', transition: 'transform 0.2s' }}
                             title="Delete"
                             onClick={() => handleDelete(idx)}
+                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                           >
                             <FaTrash />
                           </button>

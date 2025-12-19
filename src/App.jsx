@@ -9,9 +9,9 @@ import {
 } from 'react-router-dom';
 import { AuthContext, AuthProvider } from './AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { BookingProvider } from './contexts/BookingContext';
 import HomePage from './HomePage';
 import DestinationsPage from './DestinationsPage';
-import BookingModal from './BookingModal';
 import SignupModal from './SignupModal';
 import Navbar from './Navbar';
 import LoginModal from './LoginModal';
@@ -19,6 +19,7 @@ import HeroBackground from './HeroBackground';
 import CruiseShipsPage from './CruiseShipsPage';
 import BookingOverviewPage from './BookingOverviewPage';
 import SuperAdminDashboard from './SuperAdminDashboard';
+import RevenueDashboard from './RevenueDashboard';
 import CustomerDashboard from './CustomerDashboard';
 import FoodInventoryDashboard from './FoodInventoryDashboard';
 import ItineraryDashboard from './ItineraryDashboard';
@@ -38,6 +39,11 @@ import FacilitiesDashboard from './FacilitiesDashboard';
 import FacilityManagement from './FacilityManagement';
 import ThingsToDo from './ThingstoDo';
 import OurDining from './OurDining';
+import CruiseSummaryPage from './pages/CruiseSummaryPage';
+import CabinSelectionPage from './pages/CabinSelectionPage';
+import PassengersPage from './pages/PassengersPage';
+import PaymentPage from './pages/PaymentPage';
+import BookingSuccessPage from './pages/BookingSuccessPage';
 import './App.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import DynamicPricing from './DynamicPricing';
@@ -124,7 +130,6 @@ function AppRoutes(props) {
     defaultBookingCountry,
     loginKey
   } = props;
-  const { isBookingModalOpen, setIsBookingModalOpen } = useContext(AuthContext);
 
   // Hide Navbar on customer dashboard and its subpages
   const hideNavbarRoutes = [
@@ -140,6 +145,7 @@ function AppRoutes(props) {
     '/enquiries', // Hide navbar for Enquiries page
     '/itinerary-details', // Hide navbar for Itinerary Details page
     '/dynamic-pricing', // Hide navbar for Dynamic Pricing page
+    '/revenue-dashboard', // Hide navbar for Revenue Dashboard
     '/meals', // Hide navbar for Meal Preferences pages
     '/facilities', // Hide navbar for Facility Preferences pages
     '/meals-dashboard', // Hide navbar for Meals Dashboard
@@ -191,22 +197,23 @@ function AppRoutes(props) {
           if (window.location.pathname === "/signup") navigate("/login");
         }}
       />
-      <BookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-        defaultCountry={defaultBookingCountry}
-      />
       <Routes>
-        <Route path="/" element={<HomePage onBookingClick={() => setIsBookingModalOpen(true)} />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/cruise-ships" element={<CruiseShipsPage />} />
         <Route path="/destinations" element={<DestinationsPage />} />
         <Route path="/things-to-do" element={<ThingsToDo />} />
         <Route path="/our-dining" element={<OurDining />} />
-        <Route path="/booking" element={<Navigate to="/" replace />} />
+        <Route path="/booking" element={<Navigate to="/booking/summary" replace />} />
+        <Route path="/booking/summary" element={<ProtectedRoute><CruiseSummaryPage /></ProtectedRoute>} />
+        <Route path="/booking/passengers" element={<ProtectedRoute><PassengersPage /></ProtectedRoute>} />
+        <Route path="/booking/cabin" element={<ProtectedRoute><CabinSelectionPage /></ProtectedRoute>} />
+        <Route path="/booking/payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
+        <Route path="/booking/success" element={<ProtectedRoute><BookingSuccessPage /></ProtectedRoute>} />
         <Route path="/booking-overview" element={<ProtectedRoute><BookingOverviewPage /></ProtectedRoute>} />
         <Route path="/login" element={<LoginRouteHandler isAuthenticated={isAuthenticated} setIsLoginModalOpen={setIsLoginModalOpen} />} />
         <Route path="/signup" element={<SignupRouteHandler isAuthenticated={isAuthenticated} setIsSignupModalOpen={setIsSignupModalOpen} />} />
         <Route path="/super-admin" element={<ProtectedRoute><SuperAdminDashboard /></ProtectedRoute>} />
+        <Route path="/revenue-dashboard" element={<ProtectedRoute><RevenueDashboard /></ProtectedRoute>} />
         <Route path="/customer-dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
         <Route path="/food-inventory-management" element={<ProtectedRoute><FoodInventoryDashboard /></ProtectedRoute>} />
         <Route path="/itinerary-management" element={<ProtectedRoute><ItineraryDashboard /></ProtectedRoute>} />
@@ -249,16 +256,18 @@ const App = () => {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <AppRoutes
-            setIsLoginModalOpen={setIsLoginModalOpen}
-            setIsSignupModalOpen={setIsSignupModalOpen}
-            isLoginModalOpen={isLoginModalOpen}
-            isSignupModalOpen={isSignupModalOpen}
-            defaultBookingCountry={defaultBookingCountry}
-            loginKey={loginKey}
-          />
-        </Router>
+        <BookingProvider>
+          <Router>
+            <AppRoutes
+              setIsLoginModalOpen={setIsLoginModalOpen}
+              setIsSignupModalOpen={setIsSignupModalOpen}
+              isLoginModalOpen={isLoginModalOpen}
+              isSignupModalOpen={isSignupModalOpen}
+              defaultBookingCountry={defaultBookingCountry}
+              loginKey={loginKey}
+            />
+          </Router>
+        </BookingProvider>
       </ToastProvider>
     </AuthProvider>
   );

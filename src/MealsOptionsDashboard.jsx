@@ -2,12 +2,14 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Container, Row, Col, Card, Table, Button, Modal, Form, Badge, Alert } from 'react-bootstrap';
 import { FaUtensils, FaEye, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaLeaf, FaPlus } from 'react-icons/fa';
 import { AuthContext } from './AuthContext';
+import { useToast } from './hooks/useToast';
 import logo from './assets/logo.png';
 import axios from 'axios';
 import './MealsOptionsDashboard.css';
 
 const MealsOptionsDashboard = () => {
   const { logout } = useContext(AuthContext);
+  const { showConfirm } = useToast();
   const navigate = (to) => { window.location.href = to; };
   
   // State management
@@ -233,24 +235,24 @@ const MealsOptionsDashboard = () => {
   
   // Handle delete
   const handleDelete = async (optionId) => {
-    if (!window.confirm('Are you sure you want to delete this meal option?')) return;
-    
-    try {
-      const response = await axios.post('http://localhost/Project-I/backend/mealOptionsAPI.php', {
-        action: 'delete',
-        option_id: optionId
-      });
-      
-      if (response.data.success) {
-        showAlert(response.data.message, 'success');
-        fetchMealOptions();
-      } else {
-        showAlert(response.data.message, 'danger');
+    showConfirm('Are you sure you want to delete this meal option?', async () => {
+      try {
+        const response = await axios.post('http://localhost/Project-I/backend/mealOptionsAPI.php', {
+          action: 'delete',
+          option_id: optionId
+        });
+        
+        if (response.data.success) {
+          showAlert(response.data.message, 'success');
+          fetchMealOptions();
+        } else {
+          showAlert(response.data.message, 'danger');
+        }
+      } catch (error) {
+        console.error('Error deleting meal option:', error);
+        showAlert('Failed to delete meal option', 'danger');
       }
-    } catch (error) {
-      console.error('Error deleting meal option:', error);
-      showAlert('Failed to delete meal option', 'danger');
-    }
+    });
   };
   
   // Handle status toggle
@@ -455,19 +457,19 @@ const MealsOptionsDashboard = () => {
         </Card>
         
         {/* Main Table Card */}
-        <Card className="shadow-lg">
-          <Card.Body>
+        <Card className="shadow-lg border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+          <Card.Body className="p-0">
             <div className="table-responsive">
-              <Table striped bordered hover className="align-middle">
-                <thead className="table-primary">
+              <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
                   <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Title</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>#</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Image</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Title</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Type</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Description</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Status</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>

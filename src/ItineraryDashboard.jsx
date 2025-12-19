@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Modal, Button, Form, Table, Badge } from 'react-bootstrap';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes, FaRoute } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaTimes, FaRoute, FaShip, FaGlobe, FaCalendarAlt } from 'react-icons/fa';
 import './itinerary.css';
 import axios from 'axios';
 import logo from './assets/logo.png';
@@ -54,9 +54,7 @@ function ItineraryDashboard() {
   const [editingItinerary, setEditingItinerary] = useState(null);
   const [filters, setFilters] = useState({
     shipName: '',
-    arrivalCountry: '',
-    startDate: '',
-    endDate: ''
+    arrivalCountry: ''
   });
   const [availableShipNames, setAvailableShipNames] = useState([]); // Now dynamic
   const [availableCountries, setAvailableCountries] = useState([]);
@@ -142,9 +140,7 @@ function ItineraryDashboard() {
   const clearFilters = () => {
     setFilters({
       shipName: '',
-      arrivalCountry: '',
-      startDate: '',
-      endDate: ''
+      arrivalCountry: ''
     });
   };
 
@@ -291,7 +287,7 @@ function ItineraryDashboard() {
       <div style={{ marginTop: '80px', width: '100%' }}>
         {/* Header */}
         {/* Filter Section */}
-        <div className="filter-section">
+        <div className="filter-section container">
           <h3 className="filter-title">Filter Itineraries</h3>
           <div className="filter-row">
             <div className="filter-group">
@@ -308,126 +304,209 @@ function ItineraryDashboard() {
               </select>
             </div>
             <div className="filter-group">
-              <label className="filter-label">Arrival Country</label>
+              <label className="filter-label">Destination</label>
               <select
                 className="filter-input"
                 value={filters.arrivalCountry}
                 onChange={(e) => handleFilterChange('arrivalCountry', e.target.value)}
               >
-                <option value="">All Countries</option>
+                <option value="">All Destinations</option>
                 {availableCountries.map(country => (
                   <option key={country} value={country}>{country}</option>
                 ))}
               </select>
             </div>
             <div className="filter-group">
-              <label className="filter-label">Start Date</label>
-              <input
-                type="date"
-                className="filter-input"
-                value={filters.startDate}
-                onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              />
+              <div className="filter-actions">
+                <Button className="clear-btn" onClick={clearFilters}>
+                  <FaTimes /> Clear
+                </Button>
+              </div>
             </div>
-            <div className="filter-group">
-              <label className="filter-label">End Date</label>
-              <input
-                type="date"
-                className="filter-input"
-                value={filters.endDate}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              />
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="container mb-4">
+          <div className="row g-3">
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Itineraries</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{filteredItineraries.length}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaRoute style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Scheduled cruises</p>
+                </div>
+              </div>
             </div>
-            <div className="filter-group" style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'end' }}>
-              <Button className="filter-btn" onClick={() => {}}>
-                <FaSearch /> Filter
-              </Button>
-              <Button className="clear-btn" onClick={clearFilters}>
-                <FaTimes /> Clear
-              </Button>
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Active Ships</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{new Set(filteredItineraries.map(i => i.ship_name)).size}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaShip style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Fleet in service</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card shadow-sm border-0 h-100" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', borderRadius: '16px' }}>
+                <div className="card-body text-white p-4">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <p className="mb-1" style={{ fontSize: '0.9rem', opacity: 0.9 }}>Destinations</p>
+                      <h3 className="mb-0" style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>{new Set(filteredItineraries.map(i => i.route)).size}</h3>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '12px', padding: '12px' }}>
+                      <FaGlobe style={{ fontSize: '1.8rem' }} />
+                    </div>
+                  </div>
+                  <p className="mb-0" style={{ fontSize: '0.85rem', opacity: 0.8 }}>Countries covered</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Table Section */}
-        <div className="table-section">
-          <div className="table-header">
-            <h3 className="table-title">Cruise Itineraries</h3>
+        <div className="table-section container">
+          <div className="table-header mb-3 d-flex justify-content-between align-items-center">
+            <h3 className="table-title mb-0">Cruise Itineraries</h3>
             <Button className="add-btn" onClick={() => handleShowModal()}>
               <FaPlus /> Add Itinerary
             </Button>
           </div>
           
-          <Table className="itinerary-table table-striped table-bordered">
-            <thead>
-              <tr>
-                <th>Ship Name</th>
-                <th>Departure Port</th>
-                <th>Arrival Country</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Country Image</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItineraries.length > 0 ? (
-                filteredItineraries.map((itinerary) => (
-                  <tr key={itinerary.id}>
-                    <td>
-                      <strong>{itinerary.ship_name}</strong>
-                    </td>
-                    <td>
-                      <Badge className="port-badge">{itinerary.departure_port}</Badge>
-                    </td>
-                    <td>
-                      <Badge className="country-badge">{itinerary.route}</Badge>
-                    </td>
-                    <td>{formatDate(itinerary.start_date)}</td>
-                    <td>{formatDate(itinerary.end_date)}</td>
-                    <td>
-                      {itinerary.country_image && (
-                        <img src={`http://localhost/Project-I/backend/${itinerary.country_image}`} alt="Country" style={{ width: 60, height: 40, objectFit: 'cover' }} />
-                      )}
-                    </td>
-                    <td>
-                      <div className="horizontal-action-buttons">
-                        <button
-                          className="action-rect-btn edit"
-                          title="Edit"
-                          onClick={() => handleShowModal(itinerary)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="action-rect-btn delete"
-                          title="Delete"
-                          onClick={() => handleDeleteItinerary(itinerary.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+            <div className="table-responsive">
+              <Table className="align-middle mb-0" style={{ fontSize: '0.95rem' }}>
+                <thead style={{ background: '#6c5ce7', borderBottom: 'none' }}>
+                  <tr>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Ship Name</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Departure Port</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Arrival Country</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Start Date</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>End Date</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Image</th>
+                    <th style={{ padding: '12px 10px', fontWeight: '600', fontSize: '0.85rem', color: '#ffffff', textAlign: 'center' }}>Actions</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="text-center py-4">
-                    <div className="empty-state">
-                      <FaRoute className="empty-state-icon" />
-                      <div className="empty-state-text">No itineraries found</div>
-                      <div className="empty-state-subtext">
-                        {Object.values(filters).some(f => f) 
-                          ? 'Try adjusting your filters' 
-                          : 'Add your first itinerary to get started'
-                        }
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
+                </thead>
+                <tbody>
+                  {filteredItineraries.length > 0 ? (
+                    filteredItineraries.map((itinerary, index) => (
+                      <tr key={itinerary.id} style={{ background: index % 2 === 0 ? '#ffffff' : '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+                        <td style={{ padding: '14px 12px' }}>
+                          <strong style={{ color: '#667eea', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <FaShip style={{ fontSize: '0.9rem' }} />
+                            {itinerary.ship_name}
+                          </strong>
+                        </td>
+                        <td style={{ padding: '14px 12px' }}>
+                          <span style={{ background: '#e7f0ff', color: '#667eea', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            {itinerary.departure_port}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px' }}>
+                          <span style={{ background: '#e8f5e9', color: '#2e7d32', padding: '6px 14px', borderRadius: '12px', fontSize: '0.85rem', fontWeight: '500' }}>
+                            <FaGlobe style={{ marginRight: '6px', fontSize: '0.8rem' }} />
+                            {itinerary.route}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 12px', color: '#666' }}>
+                          <FaCalendarAlt style={{ marginRight: '6px', fontSize: '0.85rem', color: '#667eea' }} />
+                          {formatDate(itinerary.start_date)}
+                        </td>
+                        <td style={{ padding: '14px 12px', color: '#666' }}>
+                          <FaCalendarAlt style={{ marginRight: '6px', fontSize: '0.85rem', color: '#667eea' }} />
+                          {formatDate(itinerary.end_date)}
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          {itinerary.country_image && (
+                            <img 
+                              src={`http://localhost/Project-I/backend/${itinerary.country_image}`} 
+                              alt="Country" 
+                              style={{ 
+                                width: 60, 
+                                height: 40, 
+                                objectFit: 'cover', 
+                                borderRadius: '8px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              }} 
+                            />
+                          )}
+                        </td>
+                        <td style={{ padding: '14px 12px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button
+                              style={{
+                                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '8px 12px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
+                              }}
+                              title="Edit"
+                              onClick={() => handleShowModal(itinerary)}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              style={{
+                                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '8px 12px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s'
+                              }}
+                              title="Delete"
+                              onClick={() => handleDeleteItinerary(itinerary.id)}
+                              onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center text-muted" style={{ padding: '40px' }}>
+                        <div style={{ fontSize: '1.1rem' }}>
+                          <FaRoute style={{ fontSize: '3rem', opacity: 0.3, marginBottom: '1rem' }} />
+                          <div className="empty-state-text">No itineraries found</div>
+                          <div className="empty-state-subtext">
+                            {Object.values(filters).some(f => f) 
+                              ? 'Try adjusting your filters' 
+                              : 'Add your first itinerary to get started'
+                            }
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
+          </div>
         </div>
 
         {/* Add/Edit Modal */}
